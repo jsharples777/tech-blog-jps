@@ -18,19 +18,18 @@ const session = require('express-session');
 const cookieParser = require('cookie-parser');
 
 // Authentication middleware
-const mongoose = require('mongoose');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 
 
-isDevelopment = (process.env.MODE === 'Development');
+const isDevelopment = (process.env.MODE === 'Development');
 debug(`Is development mode ${isDevelopment}`);
 
 // Create and configure the express app
 const app = express();
 
 // Express view/template engine setup
-debug(`setting up templating engine`);
+debug('setting up templating engine');
 app.set('views', path.join(`${__dirname}/../`, 'views'));
 app.engine('handlebars', expressHandlebars({
   defaultLayout: 'default',
@@ -38,11 +37,11 @@ app.engine('handlebars', expressHandlebars({
   layoutDir: path.join(app.get('views'), 'layouts'),
 }));
 
-debug(`setting up templating engine - handlebars`);
+debug('setting up templating engine - handlebars');
 app.set('view engine', 'handlebars');
 app.set('view cache', !isDevelopment); // view caching in production
 
-debug(`Installing middlewares`);
+debug('Installing middlewares');
 
 // if (isDevelopment) {
 //   /* eslint "global_require":"off" */
@@ -95,18 +94,18 @@ const routes = require('./routes/index.js');
 app.use('/', routes); // add the routes to the express middleware
 
 // Setup authentication
-//debug('Setting up Account model and authentication with Passport');
+debug('Setting up Account model and authentication with Passport');
 // var Account = require('./models/account');
 // passport.use(new LocalStrategy(Account.authenticate()));
 // passport.serializeUser(Account.serializeUser());
 // passport.deserializeUser(Account.deserializeUser());
 
 // database connection
-//debug('Establishing database connection with Mongoose');
+debug('Establishing database connection with MySQL');
 //mongoose.connect(process.env.DB_URL);
 
 // route for the env.js file being served to the client
-debug(`Setting the environment variables for the browser to access`);
+debug('Setting the environment variables for the browser to access');
 const port = process.env.PORT || 3000;
 const LOCAL_HOST_API_DEVELOPMENT = `http://localhost:${port}/api`;
 const LOCAL_HOST_API_PRODUCTION = `https://localhost:${port}/api`;
@@ -154,20 +153,6 @@ if (isDevelopment) {
 
 const httpServer = http.Server(app);
 
-const io = require('socket.io')(httpServer); // setup socket.io
-
 httpServer.listen(port, () => {
   debug(`Server started on port ${port}`);
-
-  io.on('connection', (socket) => {
-    socketDebug('Sockets: a user connected');
-    socket.on('disconnect', () => {
-      socketDebug('Sockets: user disconnected');
-    });
-    socket.on('chat message', (msg) => {
-      socketDebug("Sockets: Received message " + msg);
-      io.emit('chat message', msg);
-      socketDebug("Sockets: Sending message " + msg);
-    });
-  });
 });

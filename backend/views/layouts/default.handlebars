@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+{{> headers/header-main }}
+<body>
+{{> navigation/navigation }}
+{{#if error}}
+    <br/>
+    <h4>{{error.msg}}</h4>
+    <br/>
+{{/if}}
+{{{body}}}
+<div id="root">
+    {{>socket-test}}
+</div>
+{{> footers/footer-main }}
+</body>
+{{> jsincludes/js-main}}
+</html>

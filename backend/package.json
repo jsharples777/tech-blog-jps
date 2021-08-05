@@ -1,0 +1,79 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "Template for back-end with Webpack",
+  "main": "./dist/server.js",
+  "scripts": {
+    "tsc": "tsc",
+    "test": "jest",
+    "webpack_compile": "webpack --mode development",
+    "webpack_watch": "webpack --mode development --watch",
+    "compile": "babel src --out-dir dist  --verbose --extensions '.jsx,.js,.ts,.tsx'",
+    "watch": "babel src --out-dir dist --watch --verbose  --extensions '.jsx,.js,.ts,.tsx'",
+    "start": "nodemon -e js,graphql,env -w . -w .env  -w . dist/server.js",
+    "lint": "eslint --ignore-pattern dist --fix ."
+  },
+  "dependencies": {
+    "babel-polyfill": "^6.26.0",
+    "body-parser": "^1.19.0",
+    "connect-flash": "^0.1.1",
+    "cookie-parser": "^1.4.5",
+    "debug": "^4.3.2",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "express-handlebars": "^5.3.2",
+    "express-session": "^1.17.2",
+    "http": "0.0.1-security",
+    "http-errors": "~1.6.3",
+    "jquery": "^3.6.0",
+    "jquery-ui": "^1.12.1",
+    "mocha": "^9.0.2",
+    "mongodb": "^4.0.0",
+    "mongoose": "^5.13.2",
+    "morgan": "^1.10.0",
+    "nodemon": "^2.0.7",
+    "passport": "^0.4.1",
+    "passport-local": "^1.0.0",
+    "passport-local-mongoose": "^6.1.0",
+    "path": "^0.12.7",
+    "request": "^2.88.2",
+    "serve-favicon": "^2.5.0",
+    "socket.io": "^4.1.3",
+    "webpack": "^5.47.1",
+    "webpack-cli": "^4.7.2",
+    "webpack-dev-middleware": "^5.0.0",
+    "webpack-hot-middleware": "^2.25.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.14.5",
+    "@babel/core": "^7.14.6",
+    "@babel/preset-env": "^7.14.7",
+    "@babel/preset-react": "^7.14.5",
+    "@babel/preset-typescript": "^7.14.5",
+    "@types/jest": "^26.0.24",
+    "@types/mongodb": "^4.0.7",
+    "@types/node": "^16.4.7",
+    "babel-loader": "^8.2.2",
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^13.2.0",
+    "eslint-plugin-import": "^2.23.4",
+    "eslint-plugin-typescript": "^0.14.0",
+    "jest": "^27.0.6",
+    "ts-jest": "^27.0.4",
+    "typescript": "^4.3.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jsharples777/template-feo-react-babel.git"
+  },
+  "keywords": [
+    "React",
+    "Babel"
+  ],
+  "author": "Jim Sharples",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jsharples777/template-feo-react-babel/issues"
+  },
+  "homepage": "https://github.com/jsharples777/template-feo-react-babel#readme"
+}

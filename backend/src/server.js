@@ -32,9 +32,9 @@ const app = express();
 debug('setting up templating engine');
 app.set('views', path.join(`${__dirname}/../`, 'views'));
 app.engine('handlebars', expressHandlebars({
-  defaultLayout: 'default',
-  partialsDir: path.join(app.get('views'), 'partials'),
-  layoutDir: path.join(app.get('views'), 'layouts'),
+    defaultLayout: 'default',
+    partialsDir: path.join(app.get('views'), 'partials'),
+    layoutDir: path.join(app.get('views'), 'layouts'),
 }));
 
 debug('setting up templating engine - handlebars');
@@ -43,30 +43,23 @@ app.set('view cache', !isDevelopment); // view caching in production
 
 debug('Installing middlewares');
 
-// if (isDevelopment) {
-//   /* eslint "global_require":"off" */
-//   /* eslint "import/no-extraneous-dependencies":"off" */
-//   debug("Installing HMR middleware");
-//   const webpack = require('webpack');
-//   const devMiddleware = require('webpack-dev-middleware');
-//   const hotMiddleware = require('webpack-hot-middleware');
-//
-//   const config = require('../../frontend/webpack.config.server.js');
-//   config.entry.app.push('webpack-hot-middleware/client');
-//   config.plugins = config.plugin || [];
-//   config.plugins.push(new webpack.HotModuleReplacementPlugin());
-//
-//   const compiler = webpack(config);
-//   app.use(devMiddleware(compiler));
-//   app.use(hotMiddleware(compiler));
-// }
+debug('Sequelizing database');
+// load models
+const models = require("./app/models");
+
+//Sync Database
+models.sequelize.sync().then(function () {
+    debug('Database sync successful');
+}).catch(function (err) {
+    debug(err, "Something went wrong with the Database Update!");
+});
 
 // Express middlewares
 app.use('/', express.static('./public')); // root directory of static content
 app.use(cookieParser()); // add cookie support
 app.use(bodyParser.json()); // add POST JSON support
-app.use(bodyParser.urlencoded({ extended: true })); // and POST URL Encoded form support
-app.use(session({ secret: 'frankie', resave: true, saveUninitialized: true })); // Add session support
+app.use(bodyParser.urlencoded({extended: true})); // and POST URL Encoded form support
+app.use(session({secret: 'frankie', resave: true, saveUninitialized: true})); // Add session support
 app.use(passport.initialize()); // initialise the authentication
 app.use(passport.session({})); // setup authentication to use cookie/sessions
 
@@ -74,16 +67,16 @@ app.use(passport.session({})); // setup authentication to use cookie/sessions
 /* Are we in Development or in Production? */
 debug('Setting up server side logging with Morgan');
 if (isDevelopment) {
-  app.use(morgan('dev')); /* log server calls with performance timing with development details */
+    app.use(morgan('dev')); /* log server calls with performance timing with development details */
 
-  /* log call requests with body */
-  app.use((request, response, next) => {
-    console.log(`Received request for ${request.url} with/without body`);
-    if (request.body) console.log(request.body);
-    next();
-  });
+    /* log call requests with body */
+    app.use((request, response, next) => {
+        console.log(`Received request for ${request.url} with/without body`);
+        if (request.body) console.log(request.body);
+        next();
+    });
 } else {
-  app.use(morgan('combined')); /* log server calls per standard combined Apache combined format */
+    app.use(morgan('combined')); /* log server calls per standard combined Apache combined format */
 }
 
 // ensure the user is logged in with a path
@@ -112,47 +105,47 @@ const LOCAL_HOST_API_PRODUCTION = `https://localhost:${port}/api`;
 let localhostAPIURL = LOCAL_HOST_API_DEVELOPMENT;
 if (!isDevelopment) localhostAPIURL = LOCAL_HOST_API_PRODUCTION;
 const API_SERVER_URL = process.env.API_SERVER_URL || localhostAPIURL;
-const env = { API_SERVER_URL };
+const env = {API_SERVER_URL};
 
-app.get('/js/env.js',(req,res) => {
-  res.send(`window.ENV = ${JSON.stringify(env)}`);
+app.get('/js/env.js', (req, res) => {
+    res.send(`window.ENV = ${JSON.stringify(env)}`);
 });
 
 
 // catch 404 and forward to error handler
 debug('Setting up 404 handler');
 app.use((req, res, next) => {
-  debug('404 forwarder');
-  const err = new Error('Not Found');
-  err.status = 404;
-  next(err);
+    debug('404 forwarder');
+    const err = new Error('Not Found');
+    err.status = 404;
+    next(err);
 });
 
 // error handler
 if (isDevelopment) {
-  debug('Setting up DEV 500 handler');
-  app.use((err, req, res, next) => {
-    debug(err);
-    res.status(err.status || 500);
-    res.render('error', {
-      message: err.message,
-      error: err,
+    debug('Setting up DEV 500 handler');
+    app.use((err, req, res, next) => {
+        debug(err);
+        res.status(err.status || 500);
+        res.render('error', {
+            message: err.message,
+            error: err,
+        });
     });
-  });
 } else {
-  debug('Production 500 handler');
-  app.use((err, req, res, next) => {
-    debug(err);
-    res.status(err.status || 500);
-    res.render('error', {
-      message: err.message,
-      error: {},
+    debug('Production 500 handler');
+    app.use((err, req, res, next) => {
+        debug(err);
+        res.status(err.status || 500);
+        res.render('error', {
+            message: err.message,
+            error: {},
+        });
     });
-  });
 }
 
 const httpServer = http.Server(app);
 
 httpServer.listen(port, () => {
-  debug(`Server started on port ${port}`);
+    debug(`Server started on port ${port}`);
 });

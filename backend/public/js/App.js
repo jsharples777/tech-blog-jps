@@ -9,8 +9,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import io from 'socket.io';
 import jquery from 'jquery';
-import logger from './util/SimpleDebug.js';
+import debug from 'debug'; // import logger from './util/SimpleDebug.js';
+
+var logger = debug('App');
 import Controller from './Controller.js';
+localStorage.debug = 'App Controller';
 
 var Root = /*#__PURE__*/function (_React$Component) {
   _inheritsLoose(Root, _React$Component);
@@ -19,8 +22,6 @@ var Root = /*#__PURE__*/function (_React$Component) {
     var _this;
 
     _this = _React$Component.call(this) || this;
-    logger.setOn();
-    logger.setLevel(100);
     _this.controller = new Controller(_assertThisInitialized(_this), window.localStorage);
     return _this;
   }
@@ -28,6 +29,7 @@ var Root = /*#__PURE__*/function (_React$Component) {
   var _proto = Root.prototype;
 
   _proto.render = function render() {
+    logger("Rendering App");
     return /*#__PURE__*/React.createElement("div", {
       id: "Root",
       className: "Root"

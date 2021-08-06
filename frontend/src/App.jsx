@@ -1,8 +1,6 @@
 import 'babel-polyfill';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import io from 'socket.io';
-import jquery from 'jquery';
 
 import debug from 'debug';
 

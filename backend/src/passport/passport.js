@@ -83,11 +83,7 @@ module.exports = function (passport, user) {
                 const userinfo = user.get();
                 return done(null, userinfo);
             }).catch(function(err) {
-                console.log("Error:", err);
-                return done(null, false, {
-                    message: 'Something went wrong with your login'
-                });
-
+                return done(err);
             });
         }
     ));

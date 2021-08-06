@@ -4,15 +4,18 @@
 <body>
 {{> navigation/navigation }}
 {{#if error}}
-    <br/>
-    <h4>{{error.msg}}</h4>
-    <br/>
+    <div class="alert alert-danger">{{error}}</div>
 {{/if}}
 {{{body}}}
 <div id="root">
-    {{>socket-test}}
 </div>
 {{> footers/footer-main }}
 </body>
 {{> jsincludes/js-main}}
+{{> jsincludes/js-popovers-tooltips}}
+{{#if user}}
+<script>
+    let userId = {{user.id}};
+</script>
+{{/if}}
 </html>

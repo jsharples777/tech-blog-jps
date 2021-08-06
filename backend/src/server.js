@@ -16,6 +16,7 @@ const expressHandlebars = require('express-handlebars');
 const bodyParser = require('body-parser');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
+const connectFlash = require('connect-flash');
 
 // Authentication middleware
 const passport = require('passport');
@@ -45,7 +46,7 @@ debug('Installing middlewares');
 debug('Sequelizing database');
 // load models
 const sequelize = require('./db/connection');
-const User = require('./models/user');
+const {User,BlogEntry,Comment} = require('./models');
 //Sync Database
 sequelize.sync().then(function () {
     debug('Database sync successful');
@@ -55,10 +56,12 @@ sequelize.sync().then(function () {
 
 // Express middlewares
 app.use('/', express.static('./public')); // root directory of static content
+app.use('/dist', express.static('./dist')); // root directory of static content
 app.use(cookieParser()); // add cookie support
 app.use(bodyParser.json()); // add POST JSON support
 app.use(bodyParser.urlencoded({extended: true})); // and POST URL Encoded form support
 app.use(session({secret: 'frankie', resave: true, saveUninitialized: true})); // Add session support
+app.use(connectFlash()); // flash messages
 app.use(passport.initialize()); // initialise the authentication
 app.use(passport.session({})); // setup authentication to use cookie/sessions
 
@@ -101,6 +104,10 @@ const API_SERVER_URL = process.env.API_SERVER_URL || localhostAPIURL;
 const env = {API_SERVER_URL};
 
 app.get('/js/env.js', (req, res) => {
+    let session = req.session;
+    if (session.id) {
+        env["id"] = session.id;
+    }
     res.send(`window.ENV = ${JSON.stringify(env)}`);
 });
 

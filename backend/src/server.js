@@ -19,7 +19,6 @@ const cookieParser = require('cookie-parser');
 
 // Authentication middleware
 const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
 
 
 const isDevelopment = (process.env.MODE === 'Development');
@@ -45,10 +44,10 @@ debug('Installing middlewares');
 
 debug('Sequelizing database');
 // load models
-const models = require("./app/models");
-
+const sequelize = require('./db/connection');
+const User = require('./models/user');
 //Sync Database
-models.sequelize.sync().then(function () {
+sequelize.sync().then(function () {
     debug('Database sync successful');
 }).catch(function (err) {
     debug(err, "Something went wrong with the Database Update!");
@@ -87,15 +86,9 @@ const routes = require('./routes/index.js');
 app.use('/', routes); // add the routes to the express middleware
 
 // Setup authentication
-debug('Setting up Account model and authentication with Passport');
-// var Account = require('./models/account');
-// passport.use(new LocalStrategy(Account.authenticate()));
-// passport.serializeUser(Account.serializeUser());
-// passport.deserializeUser(Account.deserializeUser());
-
-// database connection
-debug('Establishing database connection with MySQL');
-//mongoose.connect(process.env.DB_URL);
+debug('Setting up User model and authentication with Passport');
+//load passport strategies
+require('./passport/passport.js')(passport, User);
 
 // route for the env.js file being served to the client
 debug('Setting the environment variables for the browser to access');

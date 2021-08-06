@@ -1,13 +1,14 @@
 const express = require('express');
 const passport = require('passport');
-const Account = require('../models/account');
+const User = require('../models/user');
+const debug = require('debug')('routes');
+require('../passport/passport')(passport,User);
 
 const router = express.Router();
 const auth = require('./auth');
 
 /* GET home page. */
-//router.get('/', auth.ensureAuthenticated, (req, res, next) => {
-router.get('/', (req, res, next) => {
+router.get('/', auth.ensureAuthenticated, (req, res, next) => {
   res.render('index', { user: req.user });
 });
 
@@ -15,41 +16,25 @@ router.get('/register', (req, res) => {
   res.render('register', {});
 });
 
-router.post('/register', (req, res) => {
-  console.log('Starting route POST /register');
-  console.log(req.body.username);
-  console.log(req.body.password);
-  Account.register(new Account({ username: req.body.username }),
-    req.body.password,
-    (err, account) => {
-      if (err) {
-        console.log('Error - failed to register');
-        return res.render('register', { error: err.message });
-      }
-      console.log('Registered');
+router.post('/register', passport.authenticate('local-register', {
+  successRedirect: '/',
+  failureRedirect: '/register'
+}));
 
-      passport.authenticate('local')(req, res, () => {
-        req.session.save((err) => {
-          if (err) {
-            return next(err);
-          }
-          res.redirect('/');
-        });
-      });
-    });
-});
 
 router.get('/login', (req, res) => {
   res.render('login', { user: req.user, layout: 'login' });
 });
 
-router.post('/login', passport.authenticate('local'), (req, res) => {
-  res.redirect('/');
-});
+router.post('/login', passport.authenticate('local-login', {
+  successRedirect: '/',
+  failureRedirect: '/login'
+}));
 
 router.get('/logout', (req, res) => {
-  req.logout();
-  res.redirect('/');
+  req.session.destroy((err) => {
+    res.redirect('/');
+  });
 });
 
 router.get('/ping', (req, res) => {

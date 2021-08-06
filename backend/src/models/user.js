@@ -1,28 +1,32 @@
-module.exports = function (sequelize, Sequelize) {
+const {Sequelize} = require('sequelize');
+const sequelize = require('../db/connection.js');
 
-    const User = sequelize.define('user', {
+const User = sequelize.define('User', {
 
-        id: {
-            autoIncrement: true,
-            primaryKey: true,
-            type: Sequelize.INTEGER
-        },
-        username: {
-            type: Sequelize.TEXT
-        },
-        password: {
-            type: Sequelize.STRING,
-            allowNull: false
-        },
-        last_login: {
-            type: Sequelize.DATE
-        },
-        status: {
-            type: Sequelize.ENUM('active', 'inactive'),
-            defaultValue: 'active'
-        }
-    });
+    id: {
+        autoIncrement: true,
+        primaryKey: true,
+        type: Sequelize.INTEGER
+    },
 
-    return User;
+    username: {
+        type: Sequelize.TEXT
+    },
 
-}
+    password: {
+        type: Sequelize.STRING,
+        allowNull: false
+    },
+
+    last_login: {
+        type: Sequelize.DATE
+    },
+
+    status: {
+        type: Sequelize.ENUM('active', 'inactive'),
+        defaultValue: 'active'
+    }});
+
+
+module.exports = User;
+

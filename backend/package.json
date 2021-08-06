@@ -5,7 +5,7 @@
   "main": "./dist/server.js",
   "scripts": {
     "tsc": "tsc",
-    "start": "nodemon -e js,graphql,env -w . -w .env  -w . dist/server.js",
+    "start": "nodemon -e js,json,graphql,env -w . -w .env  -w src -w server.js src/server.js",
     "lint": "eslint --ignore-pattern dist --fix ."
   },
   "dependencies": {
@@ -28,7 +28,6 @@
     "nodemon": "^2.0.7",
     "passport": "^0.4.1",
     "passport-local": "^1.0.0",
-    "passport-local-mysql": "^5.0.10",
     "path": "^0.12.7",
     "request": "^2.88.2",
     "sequelize": "^6.6.5",

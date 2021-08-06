@@ -25,7 +25,14 @@ const User = sequelize.define('User', {
     status: {
         type: Sequelize.ENUM('active', 'inactive'),
         defaultValue: 'active'
-    }});
+    }},
+    {
+        sequelize,
+        timestamps: false,
+        freezeTableName: true,
+        underscored: true,
+        modelName: 'user',
+    });
 
 
 module.exports = User;

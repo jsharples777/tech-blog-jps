@@ -87,6 +87,9 @@ debug('Installing routes');
 const routes = require('./routes/index.js');
 // add the middleware path routing
 app.use('/', routes); // add the routes to the express middleware
+// add the api path routing
+const apiRoutes = require('./routes/api');
+app.use('/api',apiRoutes);
 
 // Setup authentication
 debug('Setting up User model and authentication with Passport');
@@ -101,7 +104,7 @@ const LOCAL_HOST_API_PRODUCTION = `https://localhost:${port}/api`;
 let localhostAPIURL = LOCAL_HOST_API_DEVELOPMENT;
 if (!isDevelopment) localhostAPIURL = LOCAL_HOST_API_PRODUCTION;
 const API_SERVER_URL = process.env.API_SERVER_URL || localhostAPIURL;
-const env = {API_SERVER_URL};
+const env = {serverURL: API_SERVER_URL};
 
 app.get('/js/env.js', (req, res) => {
     let session = req.session;

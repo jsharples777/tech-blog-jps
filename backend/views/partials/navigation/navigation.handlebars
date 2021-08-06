@@ -6,7 +6,13 @@
     </button>
     <div id="navigation" class="collapse navbar-collapse">
         <ul class="navbar-nav mr-auto">
-            <li class="nav-item pr-2"><a class="nav-link" href="/dashboard" data-toggle="tooltip" data-placement="bottom" title="Show your tech blog posts" id="navigationItemDashboard">Dashboard <i class="fas fa-columns"></i></a></li>
+            {{#if user}}
+                <li class="nav-item pr-2"><a class="nav-link" href="#" data-toggle="tooltip" data-placement="bottom" title="Show your tech blog posts" id="navigationItemDashboard">Show My Entries <i class="fas fa-columns"></i></a></li>
+                <li class="nav-item pr-2"><a class="nav-link" href="#" data-toggle="tooltip" data-placement="bottom" title="Add a new tech blog post" id="navigationItemAddNewEntry">Add New Entry <i class="fas fa-plus-square"></i></a></li>
+            {{else}}
+                <li class="nav-item pr-2"><a class="nav-link" href="/dashboard" data-toggle="tooltip" data-placement="bottom" title="Show your tech blog posts" id="navigationItemDashboard">Show My Entries <i class="fas fa-columns"></i></a></li>
+                <li class="nav-item pr-2"><a class="nav-link" href="/dashboard" data-toggle="tooltip" data-placement="bottom" title="Add a new tech blog post" id="navigationItemAddNewEntry">Add New Entry <i class="fas fa-plus-square"></i></a></li>
+            {{/if}}
         </ul>
         <ul class="navbar-nav is-pulled-right">
             <li class="nav-item dropdown">

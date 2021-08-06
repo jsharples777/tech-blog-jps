@@ -4,12 +4,10 @@ import ReactDOM from 'react-dom';
 
 import debug from 'debug';
 
-
-// import logger from './util/SimpleDebug.js';
-const logger = debug('App');
+const logger = debug('app');
 import Controller from './Controller.js';
 
-localStorage.debug = 'App Controller'
+localStorage.debug = 'app controller api local-storage state-manager'
 
 
 class Root extends React.Component {

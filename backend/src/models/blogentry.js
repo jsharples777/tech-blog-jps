@@ -25,12 +25,18 @@ const BlogEntry = sequelize.define('BlogEntry', {
             key:"id"
         }
     },
-
     changedOn: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.BIGINT,
         allowNull:false
     }
 
-});
+},
+    {
+        sequelize,
+        timestamps: false,
+        freezeTableName: true,
+        underscored: true,
+        modelName: 'blogentry',
+    });
 
 module.exports = BlogEntry;

@@ -1,4 +1,7 @@
 import apiUtil from './util/ApiUtil.js';
+import debug from 'debug';
+
+const cLogger = new debug('controller');
 
 export default class Controller {
   constructor(applicationView, clientSideStorage) {

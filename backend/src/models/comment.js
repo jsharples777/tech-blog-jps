@@ -4,36 +4,42 @@ const User = require('./user');
 const BlogEntry = require('./blogentry');
 
 const Comment = sequelize.define('Comment', {
-    id: {
-        autoIncrement: true,
-        primaryKey: true,
-        type: Sequelize.INTEGER
-    },
-    content: {
-        type: Sequelize.STRING
-    },
+        id: {
+            autoIncrement: true,
+            primaryKey: true,
+            type: Sequelize.INTEGER
+        },
+        content: {
+            type: Sequelize.STRING
+        },
 
-    createdBy: {
-        type: Sequelize.INTEGER,
-        references: {
-            model:User,
-            key:"id"
+        createdBy: {
+            type: Sequelize.INTEGER,
+            references: {
+                model: User,
+                key: "id"
+            }
+        },
+
+        commentOn: {
+            type: Sequelize.INTEGER,
+            references: {
+                model: BlogEntry,
+                key: "id"
+            },
+        },
+
+        changedOn: {
+            type: Sequelize.BIGINT,
+            allowNull: false
         }
     },
-
-    commentOn: {
-        type: Sequelize.INTEGER,
-        references: {
-            model:BlogEntry,
-            key:"id"
-        },
-    },
-
-    changedOn: {
-        type: Sequelize.INTEGER,
-        allowNull:false
-    }
-
-});
+    {
+        sequelize,
+        timestamps: false,
+        freezeTableName: true,
+        underscored: true,
+        modelName: 'comment',
+    });
 
 module.exports = Comment;

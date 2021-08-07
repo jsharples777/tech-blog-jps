@@ -24,6 +24,19 @@ class BrowserUtil {
       }
     }
   }
+
+  addRemoveClasses(element,classesText,isAdding = true) {
+    let classes = classesText.split(' ');
+    classes.forEach((classValue) => {
+        if (classValue.trim().length > 0) {
+          if (isAdding) {
+            element.classList.add(classValue);
+          } else {
+            element.classList.remove(classValue);
+          }
+        }
+    });
+  }
 }
 
 const browserUtil = new BrowserUtil();

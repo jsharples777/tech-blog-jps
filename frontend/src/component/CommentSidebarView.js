@@ -1,9 +1,11 @@
-import SidebarView from './SidebarView.js';
+import debug from 'debug';
+import moment from 'moment';
+
+import controller from "../Controller";
 import stateManager from '../util/StateManagementUtil.js';
 import isSame from '../util/EqualityFunctions.js';
 
-import debug from 'debug';
-import controller from "../Controller";
+import SidebarView from './SidebarView.js';
 
 const viewLogger = debug('view:comments');
 
@@ -39,7 +41,8 @@ class CommentSidebarView extends SidebarView {
         viewLogger(`Getting display value for comment ${item.id} with content ${item.content}`)
         // find the user for the item from the createdBy attribute
         const createdBy = stateManager.findItemInState(this.config.stateNames.users, {id: item.createdBy}, isSame);
-        return `${item.content} - ${createdBy.username}         `;
+        const createdOn = moment(item.changedOn,'YYYYMMDDHHmmss').format('DD/MM/YYYY HH:mm');
+        return `${item.content} - ${createdBy.username} on ${createdOn}  `;
     }
 
     getModifierForStateItem(name, item) {
@@ -60,6 +63,11 @@ class CommentSidebarView extends SidebarView {
 
         viewLogger(event.target);
         let id = event.target.getAttribute(this.uiConfig.dom.resultDataKeyId);
+        if (!id) {
+            //get the id from the containing element
+            let parentEl = event.target.parentNode;
+            id = parentEl.getAttribute(this.uiConfig.dom.resultDataKeyId);
+        }
         viewLogger(`Comment ${event.target.innerText} with id ${id} clicked`, 20);
         if (id) {
             id = parseInt(id);

@@ -64,11 +64,11 @@ class Root extends React.Component {
                         resultsElementAttributes: [
                             ['type', 'button'],
                         ],
-                        resultsClasses: 'list-group-item my-list-item truncate-notification list-group-item-action',
+                        resultsClasses: 'list-group-item my-list-item truncate-comment list-group-item-action',
                         resultDataKeyId: 'id',
                         resultLegacyDataKeyId: 'id',
-                        modifierClassNormal: 'list-group-item-light',
-                        modifierClassInactive: 'list-group-item-dark',
+                        modifierClassNormal: 'float-right list-group-item-primary text-right',
+                        modifierClassInactive: 'float-left list-group-item-dark text-left',
                         modifierClassActive: 'list-group-item-primary',
                         modifierClassWarning: 'list-group-item-warning',
                         iconNormal: '<i class="fas fa-trash-alt"></i>',
@@ -146,7 +146,7 @@ class Root extends React.Component {
             />
         );
         return (
-            <div className="Root row">
+            <div className="Root row ml-1">
                 {blog}
             </div>
         );

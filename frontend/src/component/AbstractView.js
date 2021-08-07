@@ -78,10 +78,7 @@ export default class AbstractView {
     newState.map((item, index) => {
 
       const childEl = this.document.createElement(domConfig.resultsElementType);
-      const classes = domConfig.resultsClasses.split(' ');
-      classes.forEach((classValue) => {
-        childEl.classList.add(classValue);
-      });
+      browserUtil.addRemoveClasses(childEl,domConfig.resultsClasses);
 
       // add the key ids for selection
       childEl.setAttribute(domConfig.resultDataKeyId, this.getIdForStateItem(name, item));
@@ -94,8 +91,7 @@ export default class AbstractView {
       switch (modifier) {
         case 'normal': {
           avLogger('Abstract View: normal item', 10);
-
-          childEl.classList.add(domConfig.modifierClassNormal);
+          browserUtil.addRemoveClasses(childEl,domConfig.modifierClassNormal);
           if (domConfig.iconNormal !== '') {
             childEl.innerHTML = displayText + domConfig.iconNormal;
           } else {
@@ -104,8 +100,8 @@ export default class AbstractView {
 
           switch (secondModifier) {
             case 'warning': {
-              childEl.classList.remove(domConfig.modifierClassNormal);
-              childEl.classList.add(domConfig.modifierClassWarning);
+              browserUtil.addRemoveClasses(childEl,domConfig.modifierClassNormal,false);
+              browserUtil.addRemoveClasses(childEl,domConfig.modifierClassWarning,true);
               if (domConfig.iconWarning !== '') {
                 childEl.innerHTML += domConfig.iconWarning;
               }
@@ -118,7 +114,7 @@ export default class AbstractView {
         }
         case 'active': {
           avLogger('Abstract View: active item', 10);
-          childEl.classList.add(domConfig.modifierClassActive);
+          browserUtil.addRemoveClasses(childEl,domConfig.modifierClassActive);
           if (domConfig.iconActive !== '') {
             childEl.innerHTML = displayText + domConfig.iconActive;
           } else {
@@ -126,8 +122,8 @@ export default class AbstractView {
           }
           switch (secondModifier) {
             case 'warning': {
-              childEl.classList.remove(domConfig.modifierClassActive);
-              childEl.classList.add(domConfig.modifierClassWarning);
+              browserUtil.addRemoveClasses(childEl,domConfig.modifierClassNormal,false);
+              browserUtil.addRemoveClasses(childEl,domConfig.modifierClassWarning,true);
               if (domConfig.iconWarning !== '') {
                 childEl.innerHTML += domConfig.iconWarning;
               }
@@ -139,7 +135,7 @@ export default class AbstractView {
         }
         case 'inactive': {
           avLogger('Abstract View: inactive item', 10);
-          childEl.classList.add(domConfig.modifierClassInactive);
+          browserUtil.addRemoveClasses(childEl,domConfig.modifierClassInactive);
           if (domConfig.iconInactive !== '') {
             childEl.innerHTML = displayText + domConfig.iconInactive;
           } else {
@@ -166,7 +162,7 @@ export default class AbstractView {
       if (domConfig.isClickable) {
         childEl.addEventListener('click', this.eventClickItem);
       }
-      avLogger(`Abstract View: Adding child ${item._id}`);
+      avLogger(`Abstract View: Adding child ${item.id}`);
       viewEl.appendChild(childEl);
     });
   }

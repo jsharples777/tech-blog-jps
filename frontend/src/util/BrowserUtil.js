@@ -18,8 +18,10 @@ class BrowserUtil {
   }
 
   removeAllChildren(element) {
-    while (element.firstChild) {
-      element.removeChild(element.lastChild);
+    if (element && element.firstChild) {
+      while (element.firstChild) {
+        element.removeChild(element.lastChild);
+      }
     }
   }
 }

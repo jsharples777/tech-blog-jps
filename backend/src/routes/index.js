@@ -17,7 +17,7 @@ router.get('/dashboard', auth.ensureAuthenticated, (req, res, next) => {
 });
 
 router.get('/register', (req, res) => {
-  res.render('register', { user: req.user, error: req.flash()["error"]});
+  res.render('register', { layout:"login-register",user: req.user, error: req.flash()["error"]});
 });
 
 router.post('/register', passport.authenticate('local-register', {
@@ -28,7 +28,7 @@ router.post('/register', passport.authenticate('local-register', {
 
 
 router.get('/login', (req, res) => {
-  res.render('login', { user: req.user, error: req.flash()["error"]});
+  res.render('login', { layout:"login-register",user: req.user, error: req.flash()["error"]});
 });
 
 router.post('/login', passport.authenticate('local-login', {

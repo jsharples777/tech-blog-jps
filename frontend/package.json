@@ -13,10 +13,11 @@
     "lint": "eslint --ext js,jsx,tsx,ts --fix ."
   },
   "dependencies": {
-    "babel-polyfill": "^6.26.0",
     "debug": "^4.3.2",
+    "font-awesome": "^4.7.0",
     "jquery": "^3.6.0",
     "jquery-ui": "^1.12.1",
+    "moment": "^2.29.1",
     "path": "^0.12.7",
     "prop-types": "^15.7.2",
     "react": "^17.0.2",
@@ -31,6 +32,7 @@
     "@types/react": "^17.0.15",
     "@types/react-dom": "^17.0.9",
     "babel-loader": "^8.2.2",
+    "babel-polyfill": "^6.26.0",
     "eslint": "^5.16.0",
     "eslint-config-airbnb": "^17.1.1",
     "eslint-plugin-import": "^2.23.4",

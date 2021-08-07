@@ -79,13 +79,14 @@ class ApiUtil {
 
   apiFetchJSONWithPut(url, parameters, callback, queueId = 0, requestId = 0) {
     apiLogger(`Executing PUT fetch with URL ${url} with id ${parameters.id}`);
-    const delParameters = {
+    const putParameters = {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...parameters }),
     };
     if (parameters.id) url += `/${parameters.id}`;
 
-    this.__fetchJSON(url, delParameters, callback, queueId, requestId);
+    this.__fetchJSON(url, putParameters, callback, queueId, requestId);
   }
 }
 

@@ -3,7 +3,7 @@ import uuid from './UUID.js';
 
 import debug from 'debug';
 
-const dlLogger = new debug('api');
+const dlLogger = debug('api');
 
 class DownloadManager {
   constructor() {
@@ -12,6 +12,10 @@ class DownloadManager {
     this.inProgress = [];
     this.callbackForQueueRequest = this.callbackForQueueRequest.bind(this);
   }
+
+
+
+
 
 
   setBackgroundChangeListener(uiChangeListener) {
@@ -104,7 +108,7 @@ class DownloadManager {
     dlLogger(`Download Manager: initiating fetch for queue item ${item.requestId}`);
     dlLogger(item);
     if ((item.url !== null) && (item.params != null) && (item.callback != null)) {
-      switch (item.params.type) {
+      switch (item.type) {
         case 'POST': {
           apiUtil.apiFetchJSONWithPost(item.url, item.params, this.callbackForQueueRequest, item.queueId, item.requestId);
           break;

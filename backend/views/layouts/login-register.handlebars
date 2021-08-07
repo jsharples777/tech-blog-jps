@@ -7,18 +7,13 @@
     <div class="alert alert-danger">{{error}}</div>
 {{/if}}
 {{{body}}}
-{{> sidebars/comment-sb }}
-{{> sidebars/details-sb }}
 <div id="root">
 </div>
 {{> footers/footer-main }}
 </body>
 {{> jsincludes/js-vendors}}
 {{> jsincludes/js-popovers-tooltips}}
-{{> jsincludes/js-app}}
-{{#if user}}
 <script>
-    let loggedInUserId = {{user.id}};
+    let loggedInUserId = -1;
 </script>
-{{/if}}
 </html>

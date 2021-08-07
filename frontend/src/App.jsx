@@ -58,6 +58,7 @@ class Root extends React.Component {
                 commentSideBar: {
                     dom: {
                         sideBarId: 'commentSideBar',
+                        headerId: 'commentHeader',
                         resultsId: 'comments',
                         resultsElementType: 'button',
                         resultsElementAttributes: [
@@ -76,6 +77,9 @@ class Root extends React.Component {
                         iconWarning: '',
                         isDraggable: false,
                         isClickable: true,
+                        newFormId: "newComment",
+                        commentId: "comment",
+                        submitCommentId: "submitComment",
                     },
                 },
             },
@@ -85,13 +89,13 @@ class Root extends React.Component {
                 commentSideBar: {
                     view: {
                         location: 'right',
-                        expandedSize: '20%',
+                        expandedSize: '50%',
                     },
                 },
                 entryDetailsSideBar: {
                     view: {
                         location: 'left',
-                        expandedSize: '20%',
+                        expandedSize: '35%',
                     },
                 }
             },
@@ -112,6 +116,7 @@ class Root extends React.Component {
         this.handleShowEditEntry = this.handleShowEditEntry.bind(this);
         this.handleUpdateEntry = this.handleUpdateEntry.bind(this);
         this.handleAddEntry = this.handleAddEntry.bind(this);
+        this.handleAddComment = this.handleAddComment.bind(this);
         this.handleDeleteEntry = this.handleDeleteEntry.bind(this);
         this.handleDeleteComment = this.handleDeleteComment.bind(this);
 
@@ -218,14 +223,47 @@ class Root extends React.Component {
         this.detailsView.eventShow(event);
     }
 
+    handleAddComment(event) {
+        logger('Handling Add Comment');
+        event.preventDefault();
+        // prevent anything from happening if we are not logged in
+        if (!controller.isLoggedIn()) {
+            window.location.href = this.state.apis.login;
+            return;
+        }
+        // find the current user
+        let creator = stateManager.findItemInState(this.state.stateNames.users,
+            {id: controller.getLoggedInUserId()},
+            isSame);
+        logger(creator);
+        // create an empty comment
+        let entry = stateManager.getStateByName(this.state.stateNames.selectedEntry);
+        // get the comment element
+        let commentEl = document.getElementById(this.state.ui.commentSideBar.dom.commentId);
+        if (entry && commentEl) {
+            let comment = {
+                createdBy: creator.id,
+                commentOn: entry.id,
+                changedOn: parseInt(moment().format('YYYYMMDDHHmmss')),
+                content: commentEl.value.trim()
+            }
+            commentEl.value = '';
+            controller.addComment(comment);
+            logger(comment);
+        }
+    }
+
     handleSelectEntryComments(event) {
         logger('Handling Select Entry Comments');
         event.preventDefault();
         this.hideAllSideBars();
-        const entryId = event.target.getAttribute(this.state.controller.events.entry.eventDataKeyId);
+        let entryId = event.target.getAttribute(this.state.controller.events.entry.eventDataKeyId);
+        logger(`Handling Show Edit Entry ${entryId}`);
         if (entryId) {
             // find the entry from the state manager
+            entryId = parseInt(entryId);
             const entry = stateManager.findItemInState(this.state.stateNames.entries,{id:entryId},isSame);
+            logger(entry);
             if (entry) {
                 // select the entry and open the details sidebar
                 this.setState({selectedEntry:entry});
@@ -236,13 +274,15 @@ class Root extends React.Component {
     }
 
     handleShowEditEntry(event) {
-        logger('Handling Show Edit Entry');
         event.preventDefault();
         this.hideAllSideBars();
-        const entryId = event.target.getAttribute(this.state.controller.events.entry.eventDataKeyId);
+        let entryId = event.target.getAttribute(this.state.controller.events.entry.eventDataKeyId);
+        logger(`Handling Show Edit Entry ${entryId}`);
         if (entryId) {
             // find the entry from the state manager
+            entryId = parseInt(entryId);
             const entry = stateManager.findItemInState(this.state.stateNames.entries,{id:entryId},isSame);
+            logger(entry);
             if (entry) {
                 // select the entry and open the details sidebar
                 this.setState({selectedEntry:entry});
@@ -253,12 +293,13 @@ class Root extends React.Component {
     }
 
     handleDeleteEntry(event) {
-        logger('Handling Delete Entry');
         event.preventDefault();
         this.hideAllSideBars();
-        const entryId = event.target.getAttribute(this.state.controller.events.entry.eventDataKeyId);
+        let entryId = event.target.getAttribute(this.state.controller.events.entry.eventDataKeyId);
+        logger(`Handling Delete Entry ${entryId}`);
         if (entryId) {
             // find the entry from the state manager
+            entryId = parseInt(entryId);
             const entry = stateManager.findItemInState(this.state.stateNames.entries,{id:entryId},isSame);
             if (entry) {
                 // delete the entry using the controller and remove the state manager
@@ -283,9 +324,11 @@ class Root extends React.Component {
 }
 
 //localStorage.debug = 'app view controller api local-storage state-manager';
-localStorage.debug = 'app view controller view:comments view:blogentry view:details';
+//localStorage.debug = 'app view controller state-manager view:comments view:blogentry view:details';
+localStorage.debug = 'app view controller view:comments';
+
 debug.log = console.info.bind(console);
 
-const element = <Root className="container-fluid"/>;
+const element = <Root className="container-fluid justify-content-around"/>;
 
 ReactDOM.render(element, document.getElementById('root'));

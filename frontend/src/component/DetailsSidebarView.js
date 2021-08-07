@@ -38,13 +38,17 @@ class DetailsSidebarView extends SidebarView {
 
   eventClickItem(event) {
     event.preventDefault();
+    viewLogger('Handling submit Details Sidebar View');
     viewLogger(event.target);
     let entry = stateManager.getStateByName(this.config.stateNames.selectedEntry);
     viewLogger(entry);
-    entry.title = this.titleEl.innerText.trim();
-    entry.content = this.contentEl.innerText.trim();
+    entry.title = this.titleEl.value.trim();
+    entry.content = this.contentEl.value.trim();
     entry.changedOn = parseInt(moment().format('YYYYMMDDHHmmss'));
     viewLogger(entry);
+    this.titleEl.value = '';
+    this.contentEl.value = '';
+    this.changeOnEl.innerText = 'Last Changed On:';
     this.applicationView.handleUpdateEntry(entry);
   }
 
@@ -53,12 +57,12 @@ class DetailsSidebarView extends SidebarView {
     viewLogger('Handling update of Details Sidebar View');
     viewLogger(newState);
     if (newState && newState.title) {
-      this.titleEl.innerText = newState.title;
-      this.contentEl.innerText = newState.content;
+      this.titleEl.value = newState.title;
+      this.contentEl.value = newState.content;
       this.changeOnEl.innerText = "Last Changed On: " + moment(newState.changedOn,'YYYYMMDDHHmmss').format('DD/MM/YYYY');
     }
     else {
-      this.titleEl.innerText = '';
+      this.titleEl.value = '';
       this.contentEl.innerText = '';
       this.changeOnEl.innerText = "Last Changed On: ";
     }

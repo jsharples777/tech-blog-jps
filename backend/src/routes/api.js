@@ -59,7 +59,10 @@ router.delete('/comment/:id', (req,res) => {
 */
 router.get('/blog', (req,res) => {
     debug('Getting all blog entries, their creators and any comments');
-    BlogEntry.findAll({include: [User, Comment]})
+    BlogEntry.findAll({
+        include: [User, Comment],
+        order: ['id','changedOn']
+    })
         .then((products) => {
             // be sure to include its associated Products
             res.json(products);
@@ -76,8 +79,21 @@ router.post('/blog', (req,res) => {
     const changedOn = parseInt(moment().format("YYYYMMDDHHmmss"));
     req.body["changedOn"] = changedOn;
     BlogEntry.create(req.body)
-        .then((tag) => {
-            res.json(tag);
+        .then((blog) => {
+            debug(`Created new blog entry with id ${blog.id} need full object now`);
+            BlogEntry.findOne({
+                include: [User, Comment],
+                where: {
+                    id: blog.id
+                }
+            })
+            .then((blog) => {
+               res.json(blog);
+            })
+            .catch((err) => {
+                debug(err);
+                res.status(400).json(err);
+            });
         })
         .catch((err) => {
             debug(err);
@@ -94,8 +110,8 @@ router.put('/blog/:id', (req,res) => {
         {
             where: {id: req.params.id}
         })
-        .then((comment) => {
-            res.json(comment);
+        .then((blog) => {
+            res.json(blog);
         })
         .catch((err) => {
             debug(err);

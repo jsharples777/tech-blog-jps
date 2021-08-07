@@ -48,7 +48,7 @@ class SidebarView extends AbstractView {
   }
 
   eventShow(event) {
-    this.__showHide('20%');
+    this.__showHide(this.uiPrefs.view.expandedSize);
   }
 }
 

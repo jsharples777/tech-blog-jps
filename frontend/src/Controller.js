@@ -1,6 +1,7 @@
 import debug from 'debug';
 import downloader from "./util/DownloadManager.js";
 import stateManager from "./util/StateManagementUtil.js";
+import isSame from "./util/EqualityFunctions";
 
 const cLogger = debug('controller');
 
@@ -18,6 +19,7 @@ class Controller {
         this.callbackForUsers = this.callbackForUsers.bind(this);
         this.callbackForEntries = this.callbackForEntries.bind(this);
         this.callbackForCreateEntry = this.callbackForCreateEntry.bind(this);
+        this.callbackForCreateComment = this.callbackForCreateComment.bind(this);
 
         // state listener
         this.stateChangeListener = this.stateChangeListener.bind(this);
@@ -71,6 +73,29 @@ class Controller {
             entry = data;
         }
         stateManager.addNewItemToState(this.config.stateNames.entries, entry);
+    }
+
+    callbackForCreateComment(data,status) {
+        cLogger('callback for create comment');
+        let comment = null;
+        if (status >= 200 && status <= 299) { // do we have any data?
+            comment = data;
+            cLogger(comment);
+            // find the corresponding entry in state
+            let entry = stateManager.findItemInState(this.config.stateNames.entries,{id: comment.commentOn},isSame);
+            cLogger(entry);
+            if (entry) {
+                cLogger('callback for create comment - updating entry');
+                // update the entry with the new comment
+                entry.Comments.push(comment);
+                // update the entry in the state manager
+                stateManager.updateItemInState(this.config.stateNames.entries,entry,isSame);
+                // reselect the same entry
+                stateManager.setStateByName(this.config.stateNames.selectedEntry, entry);
+                cLogger(entry);
+            }
+        }
+
     }
     /*
     *
@@ -150,7 +175,19 @@ class Controller {
                 params: entry,
                 callback: this.callbackForCreateEntry,
             };
-            downloader.addApiRequest(jsonRequest);
+            downloader.addApiRequest(jsonRequest,true);
+        }
+    }
+
+    apiCreateComment(comment) {
+        if (comment) {
+            const jsonRequest = {
+                url: this.getServerAPIURL() + this.config.apis.comment,
+                type: 'POST',
+                params: comment,
+                callback: this.callbackForCreateComment,
+            };
+            downloader.addApiRequest(jsonRequest,true);
         }
     }
 
@@ -235,6 +272,9 @@ class Controller {
                 cLogger('Found comment in entry - removing');
                 comments.splice(foundIndex, 1);
                 cLogger(entry);
+                // update the statement manager
+                stateManager.setStateByName(this.config.stateNames.selectedEntry,entry);
+                stateManager.updateItemInState(this.config.stateNames.entries,entry,isSame);
             }
         }
         this.apiDeleteComment(id);
@@ -242,9 +282,9 @@ class Controller {
 
     deleteEntry(entry) {
         if (entry) {
-            cLogger(`Handling delete comment for ${entry.id} and comment ${id}`);
+            cLogger(`Handling delete entry for ${entry.id}`);
             // update the state manager
-            stateManager.removeItemFromState(this.config.stateNames.entries,entry.isSame);
+            stateManager.removeItemFromState(this.config.stateNames.entries,entry,isSame);
             // initiate a call to remove from the database
             this.apiDeleteEntry(entry);
         }
@@ -267,6 +307,15 @@ class Controller {
         }
     }
 
+    addComment(comment) {
+        if (comment) {
+            cLogger(comment);
+            cLogger(`Handling create for comment`);
+
+
+            this.apiCreateComment(comment);
+        }
+    }
 }
 
 const controller = new Controller();

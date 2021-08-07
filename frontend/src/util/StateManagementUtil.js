@@ -1,6 +1,6 @@
 import debug from 'debug';
 
-const smLogger = new debug('state-manager');
+const smLogger = debug('state-manager');
 
 /** To Do - make state unchangeable outside of this class (i.e. deep copies) */
 class StateManagementUtil {
@@ -115,6 +115,8 @@ class StateManagementUtil {
     let result = {};
     const state = this.getStateByName(name);
     const foundIndex = state.findIndex(element => testForEqualityFunction(element, item));
+    smLogger(`Finding item in state ${name} - found index ${foundIndex}`);
+    smLogger(item);
     if (foundIndex >= 0) {
       result = state[foundIndex];
     }

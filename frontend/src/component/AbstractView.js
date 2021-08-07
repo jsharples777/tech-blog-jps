@@ -69,13 +69,14 @@ export default class AbstractView {
   createResultsForState(name, newState) {
     avLogger('Abstract View : creating Results', 10);
     avLogger(newState);
+    const domConfig = this.uiConfig.dom;
     // remove the previous items from list
-    const viewEl = document.getElementById(name);
+    const viewEl = document.getElementById(domConfig.resultsId);
     browserUtil.removeAllChildren(viewEl);
 
     // add the new children
     newState.map((item, index) => {
-      const domConfig = this.uiConfig.dom;
+
       const childEl = this.document.createElement(domConfig.resultsElementType);
       const classes = domConfig.resultsClasses.split(' ');
       classes.forEach((classValue) => {

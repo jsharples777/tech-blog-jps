@@ -46,8 +46,8 @@ export default class BlogEntry extends React.Component {
 
 
             return (
-                <div className="col-sm-12 col-md-4 col-3">
-                    <div className={"card"} style={{width: "18rem"}}>
+                <div className="col-sm-12 col-md-6 col-lg-4 col-xl-3 p-2">
+                    <div className={"card"} style={{width: "350px"}}>
                         <div className={"card-header"}>
                             {entry.title}&nbsp;&nbsp;&nbsp;&nbsp;<a className="text-decoration-none">
                             <span className="badge badge-pill badge-primary text-right" entry-id={entry.id} onClick={showCommentsHandler}>&nbsp;{entry.Comments.length}&nbsp;</span></a>

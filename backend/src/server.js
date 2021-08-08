@@ -64,14 +64,19 @@ app.use('/dist', express.static('./dist')); // root directory of static content
 app.use(cookieParser()); // add cookie support
 app.use(bodyParser.json()); // add POST JSON support
 app.use(bodyParser.urlencoded({extended: true})); // and POST URL Encoded form support
+
+const myStore = new SequelizeStore({
+    db: sequelize,
+});
+
 app.use(session({
     secret: 'frankie',
     resave: true,
-    store: new SequelizeStore({
-       db: sequelize
-    }),
+    store: myStore,
     saveUninitialized: true
-})); // Add session support
+}));
+
+myStore.sync();// Add session support
 app.use(connectFlash()); // flash messages
 app.use(passport.initialize()); // initialise the authentication
 app.use(passport.session({})); // setup authentication to use cookie/sessions

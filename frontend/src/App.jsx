@@ -11,6 +11,7 @@ import BlogEntry from "./component/BlogEntry.jsx";
 import stateManager from "./util/StateManagementUtil";
 import isSame from "./util/EqualityFunctions";
 import DetailsSidebarView from "./component/DetailsSidebarView";
+import socketManager from "./util/SocketManager";
 
 
 const logger = debug('app');
@@ -121,10 +122,15 @@ class Root extends React.Component {
         this.handleDeleteComment = this.handleDeleteComment.bind(this);
 
         this.controller = controller.connectToApplication(this, window.localStorage);
+        socketManager.connectToApplication(this);
+
     }
 
     render() {
         logger("Rendering App");
+        socketManager.sendMessage('Rendering app');
+
+        socketManager.sendMessage(JSON.stringify(this.state.entries));
         logger(this.state.entries);
         logger(this.state.applyUserFilter);
 
@@ -325,7 +331,7 @@ class Root extends React.Component {
 
 //localStorage.debug = 'app view controller api local-storage state-manager';
 //localStorage.debug = 'app view controller state-manager view:comments view:blogentry view:details';
-localStorage.debug = 'app view controller view:comments';
+localStorage.debug = 'app view controller socket';
 
 debug.log = console.info.bind(console);
 

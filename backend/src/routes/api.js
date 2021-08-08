@@ -1,7 +1,8 @@
 const express = require('express');
 const debug = require('debug')('api');
 const {User,BlogEntry,Comment} = require('../models');
-const moment = require('moment')
+const moment = require('moment');
+const socketManager = require('../util/SocketManager');
 
 const router = express.Router();
 
@@ -11,6 +12,9 @@ const router = express.Router();
 * */
 router.post('/comment', (req,res) => {
     debug('Creating a Comment');
+
+    socketManager.sendMessage('Creating a comment');
+
     const changedOn = parseInt(moment().format("YYYYMMDDHHmmss"));
     req.body["changedOn"] = changedOn;
     debug(req.body);
@@ -26,6 +30,10 @@ router.post('/comment', (req,res) => {
 
 router.put('/comment/:id', (req,res) => {
     debug(`Updating Comment with id ${req.params.id}`);
+
+    socketManager.sendMessage(`Updating Comment with id ${req.params.id}`);
+
+
     const changedOn = parseInt(moment().format("YYYYMMDDHHmmss"));
     req.body["changedOn"] = changedOn;
     debug(req.body);
@@ -43,6 +51,10 @@ router.put('/comment/:id', (req,res) => {
 
 router.delete('/comment/:id', (req,res) => {
     debug(`Deleting Comment with id ${req.params.id}`);
+
+    socketManager.sendMessage(`Deleting Comment with id ${req.params.id}`);
+
+
     Comment.destroy({
         where: {id: req.params.id}
     }).then((result) => {
@@ -59,6 +71,9 @@ router.delete('/comment/:id', (req,res) => {
 */
 router.get('/blog', (req,res) => {
     debug('Getting all blog entries, their creators and any comments');
+
+    socketManager.sendMessage('Getting all blog entries, their creators and any comments');
+
     BlogEntry.findAll({
         include: [User, Comment],
         order: ['id','changedOn']
@@ -74,7 +89,11 @@ router.get('/blog', (req,res) => {
 });
 
 router.post('/blog', (req,res) => {
+    socketManager.sendMessage('Creating a blog entry');
+
     debug('Creating a blog entry');
+
+
     debug(req.body);
     const changedOn = parseInt(moment().format("YYYYMMDDHHmmss"));
     req.body["changedOn"] = changedOn;
@@ -103,6 +122,10 @@ router.post('/blog', (req,res) => {
 
 router.put('/blog/:id', (req,res) => {
     debug(`Updating blog entry with id ${req.params.id}`);
+
+    socketManager.sendMessage(`Updating blog entry with id ${req.params.id}`);
+
+
     debug(req.body);
     const changedOn = parseInt(moment().format("YYYYMMDDHHmmss"));
     req.body["changedOn"] = changedOn;
@@ -120,7 +143,11 @@ router.put('/blog/:id', (req,res) => {
 });
 
 router.delete('/blog/:id', (req,res) => {
+    socketManager.sendMessage(`Deleting blog entry with id ${req.params.id}`);
+
     debug(`Deleting blog entry with id ${req.params.id}`);
+
+
     BlogEntry.destroy({
         where: {id: req.params.id}
     })
@@ -138,6 +165,9 @@ router.delete('/blog/:id', (req,res) => {
 */
 router.get('/users', (req,res) => {
     debug('Getting all user entries');
+
+    socketManager.sendMessage('Getting all user entries');
+
     User.findAll({attributes: ['id','username']})
         .then((users) => {
             // be sure to include its associated Products

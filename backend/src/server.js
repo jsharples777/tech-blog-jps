@@ -2,7 +2,7 @@
 const dotenv = require('dotenv').config();
 const morgan = require('morgan');
 const debug = require('debug')('server');
-const socketDebug = require('debug')('sockets');
+const socketDebug = require('debug')('socket');
 
 // HTTP handlers
 const createError = require('http-errors');
@@ -18,9 +18,12 @@ const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const connectFlash = require('connect-flash');
 
+// Sockets
+const socketManager = require('./util/SocketManager');
+
+
 // Authentication middleware
 const passport = require('passport');
-
 
 const isDevelopment = (process.env.MODE === 'Development');
 debug(`Is development mode ${isDevelopment}`);
@@ -148,7 +151,29 @@ if (isDevelopment) {
 }
 
 const httpServer = http.Server(app);
+// setup the sockets manager with the server
+socketManager.connectToServer(httpServer);
+//const io = new Server(httpServer);
+
+//io.on('connection', (socket) => {
+//    console.log('----A USER CONNECTED-----');
+//});
 
 httpServer.listen(port, () => {
     debug(`Server started on port ${port}`);
+    // start listening for socket events
+    socketManager.listen();
+    // socketDebug("starting socket listener");
+    // io.on('connection', (socket) => {
+    //     socketDebug('Sockets: a user connected');
+    //     socket.on('disconnect', () => {
+    //         socketDebug('Sockets: user disconnected');
+    //     });
+    //     socket.on('chat message', (msg) => {
+    //         socketDebug("Sockets: Received message " + msg);
+    //         io.emit('chat message', msg);
+    //         socketDebug("Sockets: Sending message " + msg);
+    //     });
+//    });
 });
+

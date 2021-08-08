@@ -1,4 +1,4 @@
-import BulmaNotification from './Notifications.js';
+import BootstrapNotification from './BootstrapNotification.js';
 
 class NotificationManager {
   constructor() {
@@ -13,7 +13,7 @@ class NotificationManager {
   }
 
   show(title, message, context = 'info', duration = 5000) {
-    const notification = new BulmaNotification(this);
+    const notification = new BootstrapNotification(this);
     const notificationNode = notification.show(title, message, this.currentCount * this.offsetPerNotification, context, duration);
     this.currentCount++;
     this.notifications.push(notificationNode);

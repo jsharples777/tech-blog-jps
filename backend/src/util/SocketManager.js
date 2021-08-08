@@ -25,8 +25,8 @@ class SocketManager {
     }
 
     sendMessage(message) {
-        socketDebug("Sending message " + message);
-        this.io.emit('message', message);
+        socketDebug("Sending data " + message);
+        this.io.emit('data', JSON.stringify(message));
     }
 }
 

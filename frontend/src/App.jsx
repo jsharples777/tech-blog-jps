@@ -126,11 +126,17 @@ class Root extends React.Component {
 
     }
 
+    getCurrentUser() {
+        return controller.getLoggedInUserId();
+    }
+
+    handleDataChangedByAnotherUser(message) {
+        logger('Received new data, passing to Controller');
+        controller.handleDataChangedByAnotherUser(message);
+    }
+
     render() {
         logger("Rendering App");
-        socketManager.sendMessage('Rendering app');
-
-        socketManager.sendMessage(JSON.stringify(this.state.entries));
         logger(this.state.entries);
         logger(this.state.applyUserFilter);
 
@@ -232,6 +238,10 @@ class Root extends React.Component {
     handleAddComment(event) {
         logger('Handling Add Comment');
         event.preventDefault();
+        // get the comment element
+        let commentEl = document.getElementById(this.state.ui.commentSideBar.dom.commentId);
+        if (commentEl.value.trim().length() === 0) return;
+
         // prevent anything from happening if we are not logged in
         if (!controller.isLoggedIn()) {
             window.location.href = this.state.apis.login;
@@ -242,11 +252,10 @@ class Root extends React.Component {
             {id: controller.getLoggedInUserId()},
             isSame);
         logger(creator);
-        // create an empty comment
+        // find the selected entry
         let entry = stateManager.getStateByName(this.state.stateNames.selectedEntry);
-        // get the comment element
-        let commentEl = document.getElementById(this.state.ui.commentSideBar.dom.commentId);
         if (entry && commentEl) {
+            // create an empty comment
             let comment = {
                 createdBy: creator.id,
                 commentOn: entry.id,

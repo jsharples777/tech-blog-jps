@@ -13,13 +13,18 @@ const router = express.Router();
 router.post('/comment', (req,res) => {
     debug('Creating a Comment');
 
-    socketManager.sendMessage('Creating a comment');
-
     const changedOn = parseInt(moment().format("YYYYMMDDHHmmss"));
     req.body["changedOn"] = changedOn;
     debug(req.body);
     Comment.create(req.body)
     .then((comment) => {
+        const message = {
+            type:"create",
+            objectType: "Comment",
+            data:comment,
+            user:req.user.id,
+        }
+        socketManager.sendMessage(message);
         res.json(comment);
     })
     .catch((err) => {
@@ -31,9 +36,6 @@ router.post('/comment', (req,res) => {
 router.put('/comment/:id', (req,res) => {
     debug(`Updating Comment with id ${req.params.id}`);
 
-    socketManager.sendMessage(`Updating Comment with id ${req.params.id}`);
-
-
     const changedOn = parseInt(moment().format("YYYYMMDDHHmmss"));
     req.body["changedOn"] = changedOn;
     debug(req.body);
@@ -41,6 +43,14 @@ router.put('/comment/:id', (req,res) => {
     {
         where: {id: req.params.id}
     }).then((comment) => {
+        const message = {
+            type:"update",
+            objectType: "Comment",
+            data:comment,
+            user:req.user.id,
+        }
+        socketManager.sendMessage(message);
+
         res.json(comment);
     })
     .catch((err) => {
@@ -51,19 +61,37 @@ router.put('/comment/:id', (req,res) => {
 
 router.delete('/comment/:id', (req,res) => {
     debug(`Deleting Comment with id ${req.params.id}`);
+    // find the comment first
+    Comment.findOne({
+        where: {
+            id: req.params.id
+        }
+    })
+    .then ((comment) => {
+        Comment.destroy({
+            where: {id: comment.id}
+        }).then((result) => {
+            const message = {
+                type:"delete",
+                objectType: "Comment",
+                data:comment,
+                user:req.user.id,
+            }
+            socketManager.sendMessage(message);
+            res.json({result:true});
+        })
+        .catch((err) => {
+            debug(err);
+            res.status(400).json(err);
+        });
 
-    socketManager.sendMessage(`Deleting Comment with id ${req.params.id}`);
-
-
-    Comment.destroy({
-        where: {id: req.params.id}
-    }).then((result) => {
-        res.json({result:true});
     })
     .catch((err) => {
         debug(err);
         res.status(400).json(err);
     });
+
+
 });
 
 /*
@@ -72,15 +100,12 @@ router.delete('/comment/:id', (req,res) => {
 router.get('/blog', (req,res) => {
     debug('Getting all blog entries, their creators and any comments');
 
-    socketManager.sendMessage('Getting all blog entries, their creators and any comments');
-
     BlogEntry.findAll({
         include: [User, Comment],
         order: ['id','changedOn']
     })
-        .then((products) => {
-            // be sure to include its associated Products
-            res.json(products);
+        .then((blog) => {
+            res.json(blog);
         })
         .catch((err) => {
             debug(err);
@@ -89,8 +114,6 @@ router.get('/blog', (req,res) => {
 });
 
 router.post('/blog', (req,res) => {
-    socketManager.sendMessage('Creating a blog entry');
-
     debug('Creating a blog entry');
 
 
@@ -107,7 +130,14 @@ router.post('/blog', (req,res) => {
                 }
             })
             .then((blog) => {
-               res.json(blog);
+                const message = {
+                    type:"create",
+                    objectType: "BlogEntry",
+                    data:blog,
+                    user:req.user.id,
+                }
+                socketManager.sendMessage(message);
+                res.json(blog);
             })
             .catch((err) => {
                 debug(err);
@@ -123,9 +153,6 @@ router.post('/blog', (req,res) => {
 router.put('/blog/:id', (req,res) => {
     debug(`Updating blog entry with id ${req.params.id}`);
 
-    socketManager.sendMessage(`Updating blog entry with id ${req.params.id}`);
-
-
     debug(req.body);
     const changedOn = parseInt(moment().format("YYYYMMDDHHmmss"));
     req.body["changedOn"] = changedOn;
@@ -134,7 +161,27 @@ router.put('/blog/:id', (req,res) => {
             where: {id: req.params.id}
         })
         .then((blog) => {
-            res.json(blog);
+            debug(`Updated new blog entry with id ${blog.id} need full object now`);
+            BlogEntry.findOne({
+                include: [User, Comment],
+                where: {
+                    id: req.params.id
+                }
+            })
+                .then((blog) => {
+                    const message = {
+                        type:"update",
+                        objectType: "BlogEntry",
+                        data:blog,
+                        user:req.user.id,
+                    }
+                    socketManager.sendMessage(message);
+                    res.json(blog);
+                })
+                .catch((err) => {
+                    debug(err);
+                    res.status(400).json(err);
+                });
         })
         .catch((err) => {
             debug(err);
@@ -143,15 +190,18 @@ router.put('/blog/:id', (req,res) => {
 });
 
 router.delete('/blog/:id', (req,res) => {
-    socketManager.sendMessage(`Deleting blog entry with id ${req.params.id}`);
-
     debug(`Deleting blog entry with id ${req.params.id}`);
-
-
     BlogEntry.destroy({
         where: {id: req.params.id}
     })
         .then((result) => {
+            const message = {
+                type:"delete",
+                objectType: "BlogEntry",
+                data:{ id: parseInt(req.params.id) },
+                user:req.user.id,
+            }
+            socketManager.sendMessage(message);
             res.json({result:true});
          })
         .catch((err) => {
@@ -165,9 +215,6 @@ router.delete('/blog/:id', (req,res) => {
 */
 router.get('/users', (req,res) => {
     debug('Getting all user entries');
-
-    socketManager.sendMessage('Getting all user entries');
-
     User.findAll({attributes: ['id','username']})
         .then((users) => {
             // be sure to include its associated Products

@@ -2,6 +2,7 @@ import debug from 'debug';
 import downloader from "./util/DownloadManager.js";
 import stateManager from "./util/StateManagementUtil.js";
 import isSame from "./util/EqualityFunctions";
+import notifier from "./util/NotificationManager";
 
 const cLogger = debug('controller');
 
@@ -24,7 +25,7 @@ class Controller {
         // state listener
         this.stateChangeListener = this.stateChangeListener.bind(this);
 
-        stateManager.addChangeListenerForName(this.config.stateNames.entries,this.stateChangeListener);
+        stateManager.addChangeListenerForName(this.config.stateNames.entries, this.stateChangeListener);
 
         return this;
     }
@@ -75,21 +76,21 @@ class Controller {
         stateManager.addNewItemToState(this.config.stateNames.entries, entry);
     }
 
-    callbackForCreateComment(data,status) {
+    callbackForCreateComment(data, status) {
         cLogger('callback for create comment');
         let comment = null;
         if (status >= 200 && status <= 299) { // do we have any data?
             comment = data;
             cLogger(comment);
             // find the corresponding entry in state
-            let entry = stateManager.findItemInState(this.config.stateNames.entries,{id: comment.commentOn},isSame);
+            let entry = stateManager.findItemInState(this.config.stateNames.entries, {id: comment.commentOn}, isSame);
             cLogger(entry);
             if (entry) {
                 cLogger('callback for create comment - updating entry');
                 // update the entry with the new comment
                 entry.Comments.push(comment);
                 // update the entry in the state manager
-                stateManager.updateItemInState(this.config.stateNames.entries,entry,isSame);
+                stateManager.updateItemInState(this.config.stateNames.entries, entry, isSame);
                 // reselect the same entry
                 stateManager.setStateByName(this.config.stateNames.selectedEntry, entry);
                 cLogger(entry);
@@ -97,6 +98,7 @@ class Controller {
         }
 
     }
+
     /*
     *
     *   API calls
@@ -175,7 +177,7 @@ class Controller {
                 params: entry,
                 callback: this.callbackForCreateEntry,
             };
-            downloader.addApiRequest(jsonRequest,true);
+            downloader.addApiRequest(jsonRequest, true);
         }
     }
 
@@ -187,7 +189,7 @@ class Controller {
                 params: comment,
                 callback: this.callbackForCreateComment,
             };
-            downloader.addApiRequest(jsonRequest,true);
+            downloader.addApiRequest(jsonRequest, true);
         }
     }
 
@@ -209,6 +211,7 @@ class Controller {
             downloader.addApiRequest(jsonRequest);
         }
     }
+
     /*
     *
     * Simple Application state (URL, logged in user)
@@ -228,8 +231,7 @@ class Controller {
             if (loggedInUserId) {
                 isLoggedIn = true;
             }
-        }
-        catch (error) {
+        } catch (error) {
         }
         cLogger(`Are logged in: ${isLoggedIn}`);
         return isLoggedIn;
@@ -241,8 +243,7 @@ class Controller {
             if (loggedInUserId) {
                 result = loggedInUserId;
             }
-        }
-        catch (error) {
+        } catch (error) {
         }
         cLogger(`Logged in user id: ${result}`);
         return result;
@@ -273,8 +274,8 @@ class Controller {
                 comments.splice(foundIndex, 1);
                 cLogger(entry);
                 // update the statement manager
-                stateManager.setStateByName(this.config.stateNames.selectedEntry,entry);
-                stateManager.updateItemInState(this.config.stateNames.entries,entry,isSame);
+                stateManager.setStateByName(this.config.stateNames.selectedEntry, entry);
+                stateManager.updateItemInState(this.config.stateNames.entries, entry, isSame);
             }
         }
         this.apiDeleteComment(id);
@@ -284,7 +285,7 @@ class Controller {
         if (entry) {
             cLogger(`Handling delete entry for ${entry.id}`);
             // update the state manager
-            stateManager.removeItemFromState(this.config.stateNames.entries,entry,isSame);
+            stateManager.removeItemFromState(this.config.stateNames.entries, entry, isSame);
             // initiate a call to remove from the database
             this.apiDeleteEntry(entry);
         }
@@ -296,7 +297,7 @@ class Controller {
             if (entry.id) {
                 cLogger(`Handling update for entry ${entry.id}`);
                 // update the state manager
-                stateManager.updateItemInState(this.config.stateNames.entries,entry,isSame);
+                stateManager.updateItemInState(this.config.stateNames.entries, entry, isSame);
                 // update the database
                 this.apiUpdateEntry(entry);
             } else {
@@ -316,8 +317,141 @@ class Controller {
             this.apiCreateComment(comment);
         }
     }
+
+    /*
+    *
+    *  Handling data changes by other users
+    *
+     */
+    handleDataChangedByAnotherUser(message) {
+        cLogger(`Handling data change ${message.type} on object type ${message.objectType} made by user ${message.user}`);
+        const changeUser = stateManager.findItemInState(this.config.stateNames.users,{id:message.user},isSame);
+        let stateObj = message.data;
+        cLogger(stateObj);
+        // ok lets work out where this change belongs
+        try {
+            switch (message.type) {
+                case "create": {
+                    switch (message.objectType) {
+                        case "Comment": {
+                            // updating comments is more tricky as it is a sub object of the blog entry
+                            // find the entry in question
+                            const changedEntry = stateManager.findItemInState(this.config.stateNames.entries, {id: stateObj.commentOn}, isSame);
+                            if (changedEntry) {
+                                // add the new comment
+                                changedEntry.Comments.push(stateObj);
+                                // update the state
+                                stateManager.updateItemInState(this.config.stateNames.entries, changedEntry, isSame);
+                                // was this entry current open by the user?
+                                const currentSelectedEntry = stateManager.getStateByName(this.config.stateNames.selectedEntry);
+                                if (currentSelectedEntry) {
+                                    if (currentSelectedEntry.id === changedEntry.id) {
+                                        stateManager.setStateByName(this.config.stateNames.selectedEntry, changedEntry);
+                                    }
+                                }
+                                let username = "unknown";
+                                if (changeUser) {
+                                    username = changeUser.username;
+                                }
+                                notifier.show(changedEntry.title,`${username} added comment ${stateObj.content}`);
+                            }
+                            break;
+                        }
+                        case "BlogEntry": {
+                            // add the new item to the state
+                            stateManager.addNewItemToState(this.config.stateNames.entries, stateObj);
+                            let username = "unknown";
+                            if (changeUser) {
+                                username = changeUser.username;
+                            }
+
+                            notifier.show(stateObj.title,`${username} added new entry`);
+                            break;
+                        }
+                        case "User": {
+                            // add the new item to the state
+                            stateManager.addNewItemToState(this.config.stateNames.users, stateObj);
+
+                            notifier.show(stateObj.username,`${stateObj.username} has just registered.`,'message');
+                            break;
+                        }
+                    }
+                    break;
+                }
+                case "update": {
+                    switch (message.objectType) {
+                        case "BlogEntry": {
+                            // update the item in the state
+                            stateManager.updateItemInState(this.config.stateNames.entries, stateObj, isSame);
+                            // the entry could be selected by this (different user) but that would only be for comments, which is not what changed, so we are done
+                            break;
+                        }
+                    }
+                    break;
+                }
+                case "delete": {
+                    switch (message.objectType) {
+                        case "Comment": {
+                            // removing comments is more tricky as it is a sub object of the blog entry
+                            // find the entry in question
+                            const changedEntry = stateManager.findItemInState(this.config.stateNames.entries, {id: stateObj.commentOn}, isSame);
+                            cLogger(changedEntry);
+                            if (changedEntry) {
+                                // remove the comment
+                                let comments = changedEntry.Comments;
+                                const foundIndex = comments.findIndex(element => element.id === stateObj.id);
+                                if (foundIndex >= 0) {
+                                    // remove comment from the array
+                                    cLogger('Found comment in entry - removing');
+                                    comments.splice(foundIndex, 1);
+                                    cLogger(changedEntry);
+
+                                    // update the state
+                                    stateManager.updateItemInState(this.config.stateNames.entries, changedEntry, isSame);
+                                    // was this entry current open by the user?
+                                    const currentSelectedEntry = stateManager.getStateByName(this.config.stateNames.selectedEntry);
+                                    if (currentSelectedEntry) {
+                                        if (currentSelectedEntry.id === changedEntry.id) {
+                                            stateManager.setStateByName(this.config.stateNames.selectedEntry, changedEntry);
+                                        }
+                                    }
+                                }
+
+                            }
+                            break;
+                        }
+                        case "BlogEntry": {
+                            cLogger(`Deleting Blog Entry with id ${stateObj.id}`);
+                            const deletedEntry = stateManager.findItemInState(this.config.stateNames.entries,stateObj,isSame);
+                            cLogger(deletedEntry);
+                            if (deletedEntry) {
+                                cLogger(`Deleting Blog Entry with id ${deletedEntry.id}`);
+                                stateManager.removeItemFromState(this.config.stateNames.entries, deletedEntry, isSame);
+                                // the current user could be accessing the comments in the entry that was just deleted
+                                const currentSelectedEntry = stateManager.getStateByName(this.config.stateNames.selectedEntry);
+                                if (currentSelectedEntry) {
+                                    if (currentSelectedEntry.id === deletedEntry.id) {
+                                        cLogger(`Deleted entry is selected by user, closing sidebars`);
+                                        // ask the application to close any access to the comments
+                                        this.applicationView.hideAllSideBars();
+                                    }
+                                }
+                            }
+
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+        } catch (err) {
+            cLogger(err);
+        }
+
+    }
 }
 
-const controller = new Controller();
+const
+    controller = new Controller();
 
 export default controller;

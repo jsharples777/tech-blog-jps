@@ -156,8 +156,8 @@ class StateManagementUtil {
       result = true;
       // remove the item from the state
       smLogger('State Manager: Found item - replacing ');
-      state.splice(foundIndex, 1);
-      state.push(item);
+      state.splice(foundIndex, 1, item);
+      //state.push(item);
       smLogger(state);
       this.setStateByName(name, state);
     } else {

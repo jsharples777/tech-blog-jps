@@ -15,6 +15,7 @@ const express = require('express');
 const expressHandlebars = require('express-handlebars');
 const bodyParser = require('body-parser');
 const session = require('express-session');
+const SequelizeStore = require('connect-session-sequelize')(session.Store);
 const cookieParser = require('cookie-parser');
 const connectFlash = require('connect-flash');
 
@@ -63,7 +64,14 @@ app.use('/dist', express.static('./dist')); // root directory of static content
 app.use(cookieParser()); // add cookie support
 app.use(bodyParser.json()); // add POST JSON support
 app.use(bodyParser.urlencoded({extended: true})); // and POST URL Encoded form support
-app.use(session({secret: 'frankie', resave: true, saveUninitialized: true})); // Add session support
+app.use(session({
+    secret: 'frankie',
+    resave: true,
+    store: new SequelizeStore({
+       db: sequelize
+    }),
+    saveUninitialized: true
+})); // Add session support
 app.use(connectFlash()); // flash messages
 app.use(passport.initialize()); // initialise the authentication
 app.use(passport.session({})); // setup authentication to use cookie/sessions

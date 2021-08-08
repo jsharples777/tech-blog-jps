@@ -57,6 +57,7 @@ Please access the [Questions](#questions) section to send me an email, or access
 15. [Sequelize](https://www.npmjs.com/package/sequelize)
 16. [Passport](https://www.npmjs.com/package/passport)
 17. [Socket.io](https://socket.io/)
+18. [Connect Sesion Sequelize](https://www.npmjs.com/package/connect-session-sequelize)
 
 
 # Questions

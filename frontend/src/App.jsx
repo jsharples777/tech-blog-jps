@@ -240,7 +240,7 @@ class Root extends React.Component {
         event.preventDefault();
         // get the comment element
         let commentEl = document.getElementById(this.state.ui.commentSideBar.dom.commentId);
-        if (commentEl.value.trim().length() === 0) return;
+        if (commentEl.value.trim().length === 0) return;
 
         // prevent anything from happening if we are not logged in
         if (!controller.isLoggedIn()) {

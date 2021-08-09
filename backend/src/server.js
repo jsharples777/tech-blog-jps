@@ -65,18 +65,22 @@ app.use(cookieParser()); // add cookie support
 app.use(bodyParser.json()); // add POST JSON support
 app.use(bodyParser.urlencoded({extended: true})); // and POST URL Encoded form support
 
-const myStore = new SequelizeStore({
-    db: sequelize,
-});
+// const sessionStore = new SequelizeStore({
+//     db: sequelize,
+// });
 
 app.use(session({
     secret: 'frankie',
     resave: true,
-    store: myStore,
-    saveUninitialized: true
+    cookie: {
+        maxAge: 30*60*1000,
+    },
+    //store: sessionStore,
+    proxy: true,
 }));
 
-myStore.sync();// Add session support
+//sessionStore.sync();// Add session support
+
 app.use(connectFlash()); // flash messages
 app.use(passport.initialize()); // initialise the authentication
 app.use(passport.session({})); // setup authentication to use cookie/sessions

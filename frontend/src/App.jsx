@@ -38,6 +38,16 @@ class Root extends React.Component {
                 login: '/login',
             },
             ui: {
+                alert: {
+                    modalId: "alert",
+                    titleId: "alert-title",
+                    contentId: "alert-content",
+                    cancelButtonId: "alert-cancel",
+                    confirmButtonId: "alert-confirm",
+                    closeButtonId: "alert-close",
+                    hideClass: "d-none",
+                    showClass: "d-block",
+                },
                 navigation: {
                     showMyEntriesId: 'navigationItemDashboard',
                     addNewEntryId: 'navigationItemAddNewEntry',
@@ -111,7 +121,9 @@ class Root extends React.Component {
             },
         };
         // event handlers
-        this.handleAllEntries = this.handleAllEntries.bind(this);
+        this.cancelDelete = this.cancelDelete.bind(this);
+        this.confirmDelete = this.confirmDelete.bind(this);
+
         this.handleShowMyEntries = this.handleShowMyEntries.bind(this);
         this.handleSelectEntryComments = this.handleSelectEntryComments.bind(this);
         this.handleShowEditEntry = this.handleShowEditEntry.bind(this);
@@ -133,6 +145,13 @@ class Root extends React.Component {
     handleDataChangedByAnotherUser(message) {
         logger('Received new data, passing to Controller');
         controller.handleDataChangedByAnotherUser(message);
+    }
+
+    alert(title,content) {
+        this.titleEl.textContent = title;
+        this.contentEl.textContent = content;
+        this.modalEl.classList.remove(this.state.ui.alert.hideClass);
+        this.modalEl.classList.add(this.state.ui.alert.showClass);
     }
 
     render() {
@@ -164,6 +183,30 @@ class Root extends React.Component {
         );
     }
 
+    cancelDelete(event) {
+        this.modalEl.classList.remove(this.state.ui.alert.showClass);
+        this.modalEl.classList.add(this.state.ui.alert.hideClass);
+        event.preventDefault();
+    }
+
+    confirmDelete(event) {
+        this.modalEl.classList.remove(this.state.ui.alert.showClass);
+        this.modalEl.classList.add(this.state.ui.alert.hideClass);
+        event.preventDefault();
+        let entryId = this.modalEl.getAttribute(this.state.controller.events.entry.eventDataKeyId);
+        logger(`Handling Delete Entry ${entryId}`);
+        if (entryId) {
+            // find the entry from the state manager
+            entryId = parseInt(entryId);
+            const entry = stateManager.findItemInState(this.state.stateNames.entries,{id:entryId},isSame);
+            if (entry) {
+                // delete the entry using the controller and remove the state manager
+                controller.deleteEntry(entry);
+                stateManager.removeItemFromState(this.state.stateNames.entries,entry,isSame);
+            }
+        }
+    }
+
     componentDidMount() {
         logger('component Did Mount');
 
@@ -177,6 +220,19 @@ class Root extends React.Component {
         // navigation item handlers
         document.getElementById(this.state.ui.navigation.addNewEntryId).addEventListener('click', this.handleAddEntry);
         document.getElementById(this.state.ui.navigation.showMyEntriesId).addEventListener('click', this.handleShowMyEntries);
+
+        // alert modal dialog setup
+        this.modalEl = document.getElementById(this.state.ui.alert.modalId);
+        this.titleEl = document.getElementById(this.state.ui.alert.titleId);
+        this.contentEl = document.getElementById(this.state.ui.alert.contentId);
+        this.cancelBtnEl = document.getElementById(this.state.ui.alert.cancelButtonId);
+        this.confirmBtnEl = document.getElementById(this.state.ui.alert.confirmButtonId);
+        this.closeBtnEl = document.getElementById(this.state.ui.alert.closeButtonId);
+
+        // event listeners for the confirm delete of entry
+        this.cancelBtnEl.addEventListener('click',this.cancelDelete);
+        this.confirmBtnEl.addEventListener('click',this.confirmDelete);
+        this.closeBtnEl.addEventListener('click',this.cancelDelete);
 
         // ok lets try get things done
         this.controller.initialise();
@@ -313,14 +369,11 @@ class Root extends React.Component {
         let entryId = event.target.getAttribute(this.state.controller.events.entry.eventDataKeyId);
         logger(`Handling Delete Entry ${entryId}`);
         if (entryId) {
+            this.modalEl.setAttribute(this.state.controller.events.entry.eventDataKeyId,entryId);
             // find the entry from the state manager
             entryId = parseInt(entryId);
             const entry = stateManager.findItemInState(this.state.stateNames.entries,{id:entryId},isSame);
-            if (entry) {
-                // delete the entry using the controller and remove the state manager
-                controller.deleteEntry(entry);
-                stateManager.removeItemFromState(this.state.stateNames.entries,entry,isSame);
-            }
+            this.alert(entry.title,"Are you sure you want to delete this blog entry?")
         }
     }
 
@@ -341,7 +394,6 @@ class Root extends React.Component {
 //localStorage.debug = 'app view controller api local-storage state-manager';
 //localStorage.debug = 'app view controller state-manager view:comments view:blogentry view:details';
 //localStorage.debug = 'app view controller socket';
-
 debug.log = console.info.bind(console);
 
 const element = <Root className="container-fluid justify-content-around"/>;

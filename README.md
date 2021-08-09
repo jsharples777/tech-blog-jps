@@ -18,6 +18,8 @@ The user can access all the existing blog entries and their comments, but only w
 
 A new user can register and create a login with the Options menu, and then be able to enter their own entries and comment on other entries.
 
+If the user is idle, the session expires in 30 minutes.
+
 # Installation Instructions
 
 1.  Install [node.js](http://nodejs.org)

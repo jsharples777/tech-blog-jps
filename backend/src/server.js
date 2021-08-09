@@ -2,7 +2,7 @@
 const dotenv = require('dotenv').config();
 const morgan = require('morgan');
 const debug = require('debug')('server');
-const socketDebug = require('debug')('sockets');
+const socketDebug = require('debug')('socket');
 
 // HTTP handlers
 const createError = require('http-errors');
@@ -15,12 +15,16 @@ const express = require('express');
 const expressHandlebars = require('express-handlebars');
 const bodyParser = require('body-parser');
 const session = require('express-session');
+const SequelizeStore = require('connect-session-sequelize')(session.Store);
 const cookieParser = require('cookie-parser');
 const connectFlash = require('connect-flash');
 
+// Sockets
+const socketManager = require('./util/SocketManager');
+
+
 // Authentication middleware
 const passport = require('passport');
-
 
 const isDevelopment = (process.env.MODE === 'Development');
 debug(`Is development mode ${isDevelopment}`);
@@ -60,7 +64,23 @@ app.use('/dist', express.static('./dist')); // root directory of static content
 app.use(cookieParser()); // add cookie support
 app.use(bodyParser.json()); // add POST JSON support
 app.use(bodyParser.urlencoded({extended: true})); // and POST URL Encoded form support
-app.use(session({secret: 'frankie', resave: true, saveUninitialized: true})); // Add session support
+
+// const sessionStore = new SequelizeStore({
+//     db: sequelize,
+// });
+
+app.use(session({
+    secret: 'frankie',
+    resave: true,
+    cookie: {
+        maxAge: 30*60*1000,
+    },
+    //store: sessionStore,
+    proxy: true,
+}));
+
+//sessionStore.sync();// Add session support
+
 app.use(connectFlash()); // flash messages
 app.use(passport.initialize()); // initialise the authentication
 app.use(passport.session({})); // setup authentication to use cookie/sessions
@@ -148,7 +168,29 @@ if (isDevelopment) {
 }
 
 const httpServer = http.Server(app);
+// setup the sockets manager with the server
+socketManager.connectToServer(httpServer);
+//const io = new Server(httpServer);
+
+//io.on('connection', (socket) => {
+//    console.log('----A USER CONNECTED-----');
+//});
 
 httpServer.listen(port, () => {
     debug(`Server started on port ${port}`);
+    // start listening for socket events
+    socketManager.listen();
+    // socketDebug("starting socket listener");
+    // io.on('connection', (socket) => {
+    //     socketDebug('Sockets: a user connected');
+    //     socket.on('disconnect', () => {
+    //         socketDebug('Sockets: user disconnected');
+    //     });
+    //     socket.on('chat message', (msg) => {
+    //         socketDebug("Sockets: Received message " + msg);
+    //         io.emit('chat message', msg);
+    //         socketDebug("Sockets: Sending message " + msg);
+    //     });
+//    });
 });
+

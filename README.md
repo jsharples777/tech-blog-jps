@@ -18,6 +18,8 @@ The user can access all the existing blog entries and their comments, but only w
 
 A new user can register and create a login with the Options menu, and then be able to enter their own entries and comment on other entries.
 
+If the user is idle, the session expires in 30 minutes.
+
 # Installation Instructions
 
 1.  Install [node.js](http://nodejs.org)
@@ -56,6 +58,8 @@ Please access the [Questions](#questions) section to send me an email, or access
 14. [Express](https://www.npmjs.com/package/express)
 15. [Sequelize](https://www.npmjs.com/package/sequelize)
 16. [Passport](https://www.npmjs.com/package/passport)
+17. [Socket.io](https://socket.io/)
+18. [Connect Sesion Sequelize](https://www.npmjs.com/package/connect-session-sequelize)
 
 
 # Questions

@@ -1,4 +1,5 @@
-const  bCrypt = require('bcrypt-nodejs');
+const bCrypt = require('bcrypt-nodejs');
+const socketManager = require("../util/SocketManager");
 
 module.exports = function (passport, user) {
     const User = user;
@@ -35,6 +36,20 @@ module.exports = function (passport, user) {
                         };
 
                     User.create(data).then(function (newUser, created) {
+                        User.findOne({
+                            where: {
+                                username: username
+                            }
+                        }).then(function (user) {
+                            let message = {
+                                type: "create",
+                                objectType: "User",
+                                data: user,
+                                user: user.id
+                            }
+                            socketManager.sendMessage(message);
+
+                        });
                         if (!newUser) {
                             return done(null, false);
                         }

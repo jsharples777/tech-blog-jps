@@ -1,5 +1,5 @@
 import apiUtil from './ApiUtil.js';
-import uuid from './UUID.js';
+import uuid from '../util/UUID.js';
 
 import debug from 'debug';
 

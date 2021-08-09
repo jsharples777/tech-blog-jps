@@ -1,21 +1,43 @@
 import debug from 'debug';
+import StateChangeListener from './StateChangeListener';
 
 const smLogger = debug('state-manager');
 
+import {equalityFunction} from '../util/EqualityFunctions';
+
+export type stateValue = { name: string, value: any};
+export type stateListeners = {name:string, listeners: StateChangeListener[]};
+
 /** To Do - make state unchangeable outside of this class (i.e. deep copies) */
 class StateManagementUtil {
-  constructor() {
+  private static _instance:StateManagementUtil|null = null;
+
+  /*
+    Singleton
+   */
+  public static create():StateManagementUtil {
+    if (StateManagementUtil._instance === null) {
+      StateManagementUtil._instance = new StateManagementUtil();
+    }
+    return StateManagementUtil._instance;
+
+  }
+
+  protected applicationState:stateValue[];
+  protected stateChangeListeners:stateListeners[];
+
+  protected constructor() {
     this.applicationState = [];
     this.stateChangeListeners = [];
   }
 
-  /* private method */ __isStatePresent(name) {
+  private isStatePresent(name:string):boolean {
     const result = (this.applicationState.findIndex(element => element.name === name) >= 0);
     smLogger(`State Manager: Checking state of ${name} is present = ${result}`);
     return result;
   }
 
-  __informChangeListenersForStateWithName(name, stateObjValue) {
+  private informChangeListenersForStateWithName(name:string, stateObjValue:any) {
     smLogger(`State Manager: Informing state listeners of ${name}`);
     const foundIndex = this.stateChangeListeners.findIndex(element => element.name === name);
     if (foundIndex >= 0) {
@@ -25,7 +47,7 @@ class StateManagementUtil {
       for (let index = 0; index < changeListenersForName.listeners.length; index++) {
         smLogger(`State Manager: Found state listener of ${name} - informing`);
         const listener = changeListenersForName.listeners[index];
-        listener(name, stateObjValue);
+        listener.stateChanged(name, stateObjValue);
       }
     }
   }
@@ -37,7 +59,7 @@ class StateManagementUtil {
       name - string - the name of the state variable that they want to be informed about
       stateObjValue - object - the new state value
      */
-  addChangeListenerForName(name, listener) {
+  public addChangeListenerForName(name:string, listener:StateChangeListener):void {
     smLogger(`State Manager: Adding state listener for ${name}`);
     const foundIndex = this.stateChangeListeners.findIndex(element => element.name === name);
     if (foundIndex >= 0) {
@@ -53,7 +75,7 @@ class StateManagementUtil {
     }
   }
 
-  getStateByName(name) {
+  public getStateByName(name:string):any {
     smLogger(`State Manager: Getting state for ${name}`);
     let stateValueObj = {};
     const foundIndex = this.applicationState.findIndex(element => element.name === name);
@@ -70,7 +92,7 @@ class StateManagementUtil {
     return stateValueObj;
   }
 
-  setStateByName(name, stateObjectForName) {
+  public setStateByName(name:string, stateObjectForName:any):void {
     smLogger(`State Manager: Setting state for ${name}`);
     smLogger(stateObjectForName);
     const foundIndex = this.applicationState.findIndex(element => element.name === name);
@@ -82,13 +104,13 @@ class StateManagementUtil {
       // create the state if not already present
       this.addStateByName(name, stateObjectForName);
     }
-    this.__informChangeListenersForStateWithName(name, stateObjectForName);
+    this.informChangeListenersForStateWithName(name, stateObjectForName);
     return stateObjectForName;
   }
 
-  addStateByName(name, stateObjForName) {
+  public addStateByName(name:string, stateObjForName:any):any {
     /* create a new state attribute for the application state */
-    if (!this.__isStatePresent(name)) {
+    if (!this.isStatePresent(name)) {
       smLogger(`State Manager: Adding state for ${name} - first occurrence`);
       smLogger(stateObjForName, 201);
       const stateNameValuePair = {
@@ -103,18 +125,18 @@ class StateManagementUtil {
     return stateObjForName;
   }
 
-  addNewItemToState(name, item) { // assumes state is an array
+  public addNewItemToState(name:string, item:any):void { // assumes state is an array
     smLogger(`State Manager: Adding item to state ${name}`);
     const state = this.getStateByName(name);
     state.push(item);
     smLogger(state);
-    this.__informChangeListenersForStateWithName(name, state);
+    this.informChangeListenersForStateWithName(name, state);
   }
 
-  findItemInState(name, item, testForEqualityFunction) { // assumes state is an array
+  public findItemInState(name:string, item:any, testForEqualityFunction:equalityFunction):any { // assumes state is an array
     let result = {};
     const state = this.getStateByName(name);
-    const foundIndex = state.findIndex(element => testForEqualityFunction(element, item));
+    const foundIndex = state.findIndex((element: any) => testForEqualityFunction(element, item));
     smLogger(`Finding item in state ${name} - found index ${foundIndex}`);
     smLogger(item);
     if (foundIndex >= 0) {
@@ -123,20 +145,20 @@ class StateManagementUtil {
     return result;
   }
 
-  isItemInState(name, item, testForEqualityFunction) { // assumes state is an array
+  public isItemInState(name:string, item:any, testForEqualityFunction:equalityFunction):boolean { // assumes state is an array
     let result = false;
     const state = this.getStateByName(name);
-    const foundIndex = state.findIndex(element => testForEqualityFunction(element, item));
+    const foundIndex = state.findIndex((element: any) => testForEqualityFunction(element, item));
     if (foundIndex >= 0) {
       result = true;
     }
     return result;
   }
 
-  removeItemFromState(name, item, testForEqualityFunction) {
+  public removeItemFromState(name:string, item:any, testForEqualityFunction:equalityFunction):boolean {
     let result = false;
     const state = this.getStateByName(name);
-    const foundIndex = state.findIndex(element => testForEqualityFunction(element, item));
+    const foundIndex = state.findIndex((element: any) => testForEqualityFunction(element, item));
     if (foundIndex >= 0) {
       result = true;
       // remove the item from the state
@@ -148,10 +170,10 @@ class StateManagementUtil {
     return result;
   }
 
-  updateItemInState(name, item, testForEqualityFunction) {
+  public updateItemInState(name:string, item:any, testForEqualityFunction:equalityFunction):boolean {
     let result = false;
     const state = this.getStateByName(name);
-    const foundIndex = state.findIndex(element => testForEqualityFunction(element, item));
+    const foundIndex = state.findIndex((element: any) => testForEqualityFunction(element, item));
     if (foundIndex >= 0) {
       result = true;
       // remove the item from the state
@@ -168,5 +190,5 @@ class StateManagementUtil {
   }
 }
 
-const stateManager = new StateManagementUtil();
+const stateManager:StateManagementUtil = StateManagementUtil.create();
 export default stateManager;

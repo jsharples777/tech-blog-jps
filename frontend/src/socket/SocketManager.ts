@@ -1,16 +1,23 @@
 import debug from 'debug';
+import SocketListener from "./SocketListener";
 
 const sDebug = debug('socket');
 
-class SocketManager{
+class SocketManager {
+    protected listener:SocketListener|null;
+    protected socket:any|null;
+
+
     constructor() {
         this.callbackForMessage = this.callbackForMessage.bind(this);
         this.callbackForData = this.callbackForData.bind(this);
+        this.listener = null;
+        this.socket = null;
     }
 
-    callbackForMessage(message) {
+    private callbackForMessage(message:any):void {
         sDebug(`Received message : ${message}`);
-        this.listener.handleMessage(message);
+        if (this.listener) this.listener.handleMessage(message);
     }
 
     /*
@@ -23,11 +30,12 @@ class SocketManager{
     *        - the application view is required to implement getCurrentUser() to compare the user who made the change
     *
      */
-    callbackForData(message) {
+    private callbackForData(message:any):void {
         sDebug(`Received data`);
         try {
             const dataObj = JSON.parse(message);
             sDebug(dataObj);
+            if (this.listener === null) return;
             if (dataObj.user === this.listener.getCurrentUser()) {
                 sDebug("change made by this user, ignoring");
             }
@@ -42,17 +50,18 @@ class SocketManager{
         }
     }
 
-    setListener(listener) {
+    public setListener(listener:SocketListener) {
         sDebug('Setting listener');
         this.listener = listener;
         sDebug('Creating socket connection');
+        // @ts-ignore
         this.socket = io();
         sDebug('Waiting for messages');
         this.socket.on('message',this.callbackForMessage);
         this.socket.on('data',this.callbackForData)
     }
 
-    sendMessage(message) {
+    public sendMessage(message:string):void {
         this.socket.emit('message',message);
     }
 }

@@ -1,22 +1,26 @@
 import debug from 'debug';
 
-const lsLogger = new debug('local-storage');
+import {equalityFunction} from '../util/EqualityFunctions'
+
+const lsLogger = debug('local-storage');
 
 export default class LocalStorageUtil {
-  constructor(localStorage) {
+  protected localStorage:any;
+
+  constructor(localStorage:any) {
     this.localStorage = localStorage;
   }
 
 
-  saveWithStorageKey(key, saveData) {
+  saveWithStorageKey(key:string, saveData:any):void {
     lsLogger(`Local Storage: Saving with key ${key}`);
     lsLogger(saveData);
-    const stringifiedSaveData = JSON.stringify(saveData);
+    const stringifiedSaveData:string = JSON.stringify(saveData);
     lsLogger(stringifiedSaveData);
     this.localStorage.setItem(key, stringifiedSaveData);
   }
 
-  getWithStorageKey(key) {
+  getWithStorageKey(key:string):any[] {
     let savedResults = [];
     lsLogger(`Local Storage: Loading with key ${key}`);
     const savedResultsJSON = this.localStorage.getItem(key);
@@ -28,17 +32,17 @@ export default class LocalStorageUtil {
   }
 
   /* add a new item to the local storage if not already there */
-  addNewItemToKeyStorage(key, item) {
+  addNewItemToKeyStorage(key:string, item:any):void {
     if (item !== null) {
       lsLogger(`Local Storage: Adding with key ${key}`);
       lsLogger(item);
-      const previousResults = this.getWithStorageKey(key);
+      const previousResults:any[] = this.getWithStorageKey(key);
       previousResults.push(item);
       this.saveWithStorageKey(key, previousResults);
     }
   }
 
-  removeItemFromKeyStorage(key, item) {
+  removeItemFromKeyStorage(key:string, item:any):void {
     if (item !== null) {
       lsLogger(`Local Storage: Removing with key ${key}`);
       lsLogger(item);
@@ -53,7 +57,7 @@ export default class LocalStorageUtil {
     }
   }
 
-  removeItemFromKeyStorageWithFunctionForEquality(key, item, testForEqualityFunction) {
+  removeItemFromKeyStorageWithFunctionForEquality(key:string, item:any, testForEqualityFunction:equalityFunction) {
     if (item !== null) {
       lsLogger(`Local Storage: Removing with key ${key} and comparison function`);
       lsLogger(item, 101);

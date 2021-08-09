@@ -1,12 +1,13 @@
 import Notification from './Notification';
+import {NotificationManager} from "./NotificationManager";
 
 export default class BootstrapNotification extends Notification {
-  constructor(notificationManager) {
+  constructor(notificationManager:NotificationManager) {
      super(notificationManager);
   }
 
   // Make the notification visible on the screen
-  show(title, message, topOffset = 0, context = 'info', duration = 3000) {
+  public show(title:string, message:string, topOffset:number = 0, context:string = 'info', duration:number = 3000):HTMLElement {
     let containerId = this.notificationManager.getContainerId();
     // convert the context to a background colour
     let bgColorClass = '';
@@ -57,7 +58,7 @@ export default class BootstrapNotification extends Notification {
 
 
     // Adding the notification message content node
-    const messageNode = document.createElement('div');
+    const messageNode:HTMLElement = document.createElement('div');
     messageNode.className = 'toast-body';
     messageNode.textContent = message;
 
@@ -70,9 +71,11 @@ export default class BootstrapNotification extends Notification {
     containerNode.classList.add(`is-${context}`);
 
     // Inserting the notification to the page body
-    document.getElementById(containerId).appendChild(containerNode);
+    const containerEl:HTMLElement|null = document.getElementById(containerId);
+    if (containerEl) containerEl.appendChild(containerNode);
 
     // activate it
+    // @ts-ignore
     $(".notification").toast('show');
 
     // Default duration delay

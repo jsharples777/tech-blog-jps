@@ -1,12 +1,14 @@
 import Notification from "./Notification";
+import {NotificationManager} from "./NotificationManager";
+
 
 export default class BulmaNotification extends Notification{
-  constructor(notificationManager) {
+  constructor(notificationManager:NotificationManager) {
     super(notificationManager);
   }
 
   // Make the notification visible on the screen
-  show(title, message, topOffset = 0, context = 'info', duration = 3000) {
+  show(title:string, message:string, topOffset:number = 0, context:string = 'info', duration:number = 3000):HTMLElement {
     // Creating the notification container div
     const containerNode = document.createElement('div');
     containerNode.className = 'notification note note-visible';
@@ -38,7 +40,8 @@ export default class BulmaNotification extends Notification{
     containerNode.classList.add(`is-${context}`);
 
     // Inserting the notification to the page body
-    document.getElementById(this.containerId).appendChild(containerNode);
+    const containerEl:HTMLElement|null = document.getElementById(this.containerId);
+    if (containerEl) containerEl.appendChild(containerNode);
 
     // Default duration delay
     if (duration <= 0) {

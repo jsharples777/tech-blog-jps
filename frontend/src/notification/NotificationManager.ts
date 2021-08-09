@@ -1,6 +1,11 @@
 import notificationFactory from "./NotificationFactory";
 
-class NotificationManager {
+export class NotificationManager {
+  protected notifications:Node[];
+  protected currentCount:number;
+  protected offsetPerNotification:number;
+  protected containerId:string;
+
   constructor() {
     this.notifications = [];
     this.currentCount = 0;
@@ -10,23 +15,24 @@ class NotificationManager {
     this.show = this.show.bind(this);
   }
 
-  getContainerId() {
+  public getContainerId():string {
     return this.containerId;
   }
 
-  show(title, message, context = 'info', duration = 5000) {
+  public show(title:string, message:string, context:string = 'info', duration:number = 5000) {
     const notification = notificationFactory.createNotification(this);
     const notificationNode = notification.show(title, message, this.currentCount * this.offsetPerNotification, context, duration);
     this.currentCount++;
     this.notifications.push(notificationNode);
   }
 
-  remove(notificationNode) {
+  public remove(notificationNode:HTMLElement) {
     const foundIndex = this.notifications.findIndex(element => element === notificationNode);
     if (foundIndex >= 0) {
       this.notifications.splice(foundIndex, 1);
       // re-arrange the remaining notifications
       this.notifications.map((notificationNode, index) => {
+        // @ts-ignore
         notificationNode.style.top = `${this.offsetPerNotification * index}px`;
       });
     }

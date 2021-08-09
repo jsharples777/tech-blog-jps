@@ -1,13 +1,16 @@
 import debug from 'debug';
-import downloader from "./util/DownloadManager.js";
-import stateManager from "./util/StateManagementUtil.js";
+import downloader from "./network/DownloadManager.js";
+import stateManager from "./state/StateManagementUtil.js";
 import isSame from "./util/EqualityFunctions";
-import notifier from "./util/NotificationManager";
+import notifier from "./notification/NotificationManager";
+import SocketListener from "./socket/SocketListener";
+import socketManager from "./socket/SocketManager";
 
 const cLogger = debug('controller');
 
-class Controller {
+class Controller extends SocketListener{
     constructor() {
+        super();
     }
 
 
@@ -253,7 +256,9 @@ class Controller {
       Get the base data for the application (users, entries)
      */
     initialise() {
-        cLogger('Initialising data state')
+        cLogger('Initialising data state');
+        // listen for socket events
+        socketManager.setListener(this);
         // load the users
         this.getAllUsers();
         // load the entries
@@ -319,10 +324,19 @@ class Controller {
     }
 
     /*
-    *
+    *  sockets -
     *  Handling data changes by other users
     *
      */
+
+    handleMessage(message) {
+        cLogger(message);
+    }
+
+    getCurrentUser() {
+        return this.getLoggedInUserId();
+    }
+
     handleDataChangedByAnotherUser(message) {
         cLogger(`Handling data change ${message.type} on object type ${message.objectType} made by user ${message.user}`);
         const changeUser = stateManager.findItemInState(this.config.stateNames.users,{id:message.user},isSame);

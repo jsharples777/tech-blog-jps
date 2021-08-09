@@ -10,6 +10,7 @@ class SocketManager{
 
     callbackForMessage(message) {
         sDebug(`Received message : ${message}`);
+        this.listener.handleMessage(message);
     }
 
     /*
@@ -27,12 +28,12 @@ class SocketManager{
         try {
             const dataObj = JSON.parse(message);
             sDebug(dataObj);
-            if (dataObj.user === this.applicationView.getCurrentUser()) {
+            if (dataObj.user === this.listener.getCurrentUser()) {
                 sDebug("change made by this user, ignoring");
             }
             else {
                 sDebug("change made by another user, passing off to the application");
-                this.applicationView.handleDataChangedByAnotherUser(dataObj);
+                this.listener.handleDataChangedByAnotherUser(dataObj);
             }
 
         }
@@ -41,9 +42,9 @@ class SocketManager{
         }
     }
 
-    connectToApplication(applicationView) {
-        sDebug('Connecting to application');
-        this.applicationView = applicationView;
+    setListener(listener) {
+        sDebug('Setting listener');
+        this.listener = listener;
         sDebug('Creating socket connection');
         this.socket = io();
         sDebug('Waiting for messages');

@@ -8,15 +8,14 @@ import moment from 'moment';
 import controller from './Controller.js';
 import CommentSidebarView from "./component/CommentSidebarView";
 import BlogEntry from "./component/BlogEntry.jsx";
-import stateManager from "./util/StateManagementUtil";
+import stateManager from "./state/StateManagementUtil";
 import isSame from "./util/EqualityFunctions";
 import DetailsSidebarView from "./component/DetailsSidebarView";
-import socketManager from "./util/SocketManager";
 
 
 const logger = debug('app');
 
-class Root extends React.Component {
+class Root extends React.Component{
     constructor() {
         super();
         this.state = {
@@ -134,17 +133,10 @@ class Root extends React.Component {
         this.handleDeleteComment = this.handleDeleteComment.bind(this);
 
         this.controller = controller.connectToApplication(this, window.localStorage);
-        socketManager.connectToApplication(this);
-
     }
 
     getCurrentUser() {
         return controller.getLoggedInUserId();
-    }
-
-    handleDataChangedByAnotherUser(message) {
-        logger('Received new data, passing to Controller');
-        controller.handleDataChangedByAnotherUser(message);
     }
 
     alert(title,content) {

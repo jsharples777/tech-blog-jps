@@ -2,7 +2,7 @@ import moment from 'moment';
 import debug from 'debug';
 
 import SidebarView from './SidebarView.js';
-import stateManager from '../util/StateManagementUtil.js';
+import stateManager from '../state/StateManagementUtil.js';
 
 const viewLogger = new debug('view:details');
 

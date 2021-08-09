@@ -2,7 +2,7 @@ import debug from 'debug';
 import moment from 'moment';
 
 import controller from "../Controller";
-import stateManager from '../util/StateManagementUtil.js';
+import stateManager from '../state/StateManagementUtil.js';
 import isSame from '../util/EqualityFunctions.js';
 
 import SidebarView from './SidebarView.js';

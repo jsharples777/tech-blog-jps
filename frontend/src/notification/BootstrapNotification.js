@@ -1,15 +1,13 @@
-export default class BootstrapNotification {
+import Notification from './Notification';
+
+export default class BootstrapNotification extends Notification {
   constructor(notificationManager) {
-    this.show = this.show.bind(this);
-
-    this.notificationManager = notificationManager;
-
-    // Create DOM notification structure when instantiated
-    this.containerId = this.notificationManager.getContainerId();
+     super(notificationManager);
   }
 
   // Make the notification visible on the screen
   show(title, message, topOffset = 0, context = 'info', duration = 3000) {
+    let containerId = this.notificationManager.getContainerId();
     // convert the context to a background colour
     let bgColorClass = '';
     switch (context) {
@@ -72,7 +70,7 @@ export default class BootstrapNotification {
     containerNode.classList.add(`is-${context}`);
 
     // Inserting the notification to the page body
-    document.getElementById(this.containerId).appendChild(containerNode);
+    document.getElementById(containerId).appendChild(containerNode);
 
     // activate it
     $(".notification").toast('show');

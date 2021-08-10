@@ -1,5 +1,5 @@
 import debug from 'debug';
-import downloader from "./network/DownloadManager.js";
+import downloader from "./network/DownloadManager.ts";
 import stateManager from "./state/StateManagementUtil.js";
 import isSame from "./util/EqualityFunctions";
 import notifier from "./notification/NotificationManager";

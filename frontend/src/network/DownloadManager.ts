@@ -1,77 +1,89 @@
-import apiUtil from './ApiUtil.js';
-import uuid from '../util/UUID.js';
+import apiUtil from './ApiUtil';
+import uuid from '../util/UUID';
+import QueueListener from "./QueueListener";
+import {managerRequest, jsonRequest, queueType, RequestType} from "./Types";
 
 import debug from 'debug';
 
 const dlLogger = debug('api');
 
+
+
+
 class DownloadManager {
+  protected backgroundQueue : managerRequest[];
+  protected priorityQueue: managerRequest[];
+  protected inProgress: managerRequest[];
+  protected backgroundChangeListener:QueueListener|null;
+  protected priorityChangeListener:QueueListener|null;
+
   constructor() {
     this.backgroundQueue = [];
     this.priorityQueue = [];
     this.inProgress = [];
+    this.backgroundChangeListener = null;
+    this.priorityChangeListener= null;
+
     this.callbackForQueueRequest = this.callbackForQueueRequest.bind(this);
   }
 
-
-
-
-
-
-  setBackgroundChangeListener(uiChangeListener) {
+  public setBackgroundChangeListener(uiChangeListener:QueueListener) {
     this.backgroundChangeListener = uiChangeListener;
   }
 
-  setPriorityChangeListener(uiChangeListener) {
+  public setPriorityChangeListener(uiChangeListener:QueueListener) {
     this.priorityChangeListener = uiChangeListener;
   }
 
-  getPriorityQueueCount() {
+  public getPriorityQueueCount() {
     return this.priorityQueue.length;
   }
 
-  getBackgroundQueueCount() {
+  public getBackgroundQueueCount() {
     return this.backgroundQueue.length;
   }
 
-  addApiRequest(jsonRequest, isPriority = false) {
-    /*
-        jsonPostRequest should be an object with attributes
-        a) url - the url
-        b) params - the parameters, including type GET/POST/DELETE
-        c) callback - the function to receive the callback of results/status
-         */
+  public addApiRequest(jsonRequest:jsonRequest, isPriority = false) {
     // add a new requestId to the request for future tracking
     const requestId = uuid.getUniqueId();
-    jsonRequest.requestId = requestId;
     dlLogger(`Download Manger: Adding Queue Request ${requestId}`);
     dlLogger(jsonRequest, 200);
 
     if (isPriority) {
-      jsonRequest.queueId = 1;
-      this.priorityQueue.push(jsonRequest);
+      let managerRequest:managerRequest = {
+        originalRequest: jsonRequest,
+        requestId : requestId,
+        queueType : queueType.PRIORITY,
+        callback: this.callbackForQueueRequest,
+      }
+      this.priorityQueue.push(managerRequest);
       if (this.priorityChangeListener) this.priorityChangeListener.handleEventAddToQueue();
     } else {
-      jsonRequest.queueId = 0;
-      this.backgroundQueue.push(jsonRequest);
+      let managerRequest:managerRequest = {
+        originalRequest: jsonRequest,
+        requestId : requestId,
+        queueType : queueType.BACKGROUND,
+        callback: this.callbackForQueueRequest,
+      }
+      this.backgroundQueue.push(managerRequest);
       if (this.backgroundChangeListener) this.backgroundChangeListener.handleEventAddToQueue();
     }
     this.processQueues();
   }
 
-  async processPriorityQueue() {
-    const queueItem = this.priorityQueue.shift();
-    this.inProgress.push(queueItem);
-    this.initiateFetchForQueueItem(queueItem);
+  private async processPriorityQueue() {
+    const queueItem:managerRequest|undefined = this.priorityQueue.shift();
+    if (queueItem !== undefined) this.inProgress.push(queueItem);
+    if (queueItem !== undefined) this.initiateFetchForQueueItem(queueItem);
   }
 
-  async processBackgroundQueue() {
-    const queueItem = this.backgroundQueue.shift();
-    this.inProgress.push(queueItem);
-    this.initiateFetchForQueueItem(queueItem);
+  private async processBackgroundQueue() {
+    const queueItem:managerRequest|undefined = this.backgroundQueue.shift();
+    if (queueItem !== undefined) this.inProgress.push(queueItem);
+    if (queueItem !== undefined) this.initiateFetchForQueueItem(queueItem);
   }
 
-  async processQueues() {
+  private async processQueues() {
     let totalQueuedItems = this.priorityQueue.length + this.backgroundQueue.length;
     while (totalQueuedItems > 0) {
       dlLogger(`Download Manager: processing queue, items remaining ${totalQueuedItems}`);
@@ -85,11 +97,13 @@ class DownloadManager {
     }
   }
 
-  callbackForQueueRequest(jsonData, httpStatus, queueId, requestId) {
+  private callbackForQueueRequest(jsonData:any, httpStatus:number, queueId:number, requestId:string) {
     // let the listeners know about the completion
-    if (queueId === 1) { // priority
+    if (queueId === queueType.PRIORITY) { // priority
       if (this.priorityChangeListener) this.priorityChangeListener.handleEventRemoveFromQueue();
-    } else if (this.backgroundChangeListener) this.backgroundChangeListener.handleEventRemoveFromQueue();
+    }
+    else if (this.backgroundChangeListener) this.backgroundChangeListener.handleEventRemoveFromQueue();
+
     dlLogger(`Download Manager: received callback for queue ${queueId} request ${requestId} with status ${httpStatus}`);
     // find the item in the in progress
     const foundIndex = this.inProgress.findIndex(element => element.requestId === requestId);
@@ -104,24 +118,24 @@ class DownloadManager {
     }
   }
 
-  initiateFetchForQueueItem(item) {
+  private initiateFetchForQueueItem(item:managerRequest) {
     dlLogger(`Download Manager: initiating fetch for queue item ${item.requestId}`);
     dlLogger(item);
-    if ((item.url !== null) && (item.params != null) && (item.callback != null)) {
-      switch (item.type) {
-        case 'POST': {
-          apiUtil.apiFetchJSONWithPost(item.url, item.params, this.callbackForQueueRequest, item.queueId, item.requestId);
+    if ((item.originalRequest.url !== null) && (item.originalRequest.params != null) && (item.originalRequest.callback != null)) {
+      switch (item.originalRequest.type) {
+        case RequestType.POST: {
+          apiUtil.apiFetchJSONWithPost(item.originalRequest.url, item.originalRequestparams, this.callbackForQueueRequest, item.queueId, item.requestId);
           break;
         }
-        case 'GET': {
+        case RequestType.GET: {
           apiUtil.apiFetchJSONWithGet(item.url, item.params, this.callbackForQueueRequest, item.queueId, item.requestId);
           break;
         }
-        case 'DELETE': {
+        case RequestType.DELETE: {
           apiUtil.apiFetchJSONWithDelete(item.url, item.params, this.callbackForQueueRequest, item.queueId, item.requestId);
           break;
         }
-        case 'PUT': {
+        case RequestType.PUT: {
           apiUtil.apiFetchJSONWithPut(item.url, item.params, this.callbackForQueueRequest, item.queueId, item.requestId);
           break;
         }

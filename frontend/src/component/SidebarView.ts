@@ -1,7 +1,7 @@
-import AbstractView from './AbstractView.js';
+import AbstractView from './AbstractView';
 
-class SidebarView extends AbstractView {
-  constructor(applicationView, htmlDocument, uiConfig, uiPrefs) {
+abstract class SidebarView extends AbstractView {
+  protected constructor(applicationView:any, htmlDocument:HTMLDocument, uiConfig:any, uiPrefs:any) {
     super(applicationView, htmlDocument, uiConfig, uiPrefs);
     // event handlers
     this.eventHide = this.eventHide.bind(this);
@@ -14,14 +14,18 @@ class SidebarView extends AbstractView {
 
     // add the event listener for the close button
     const sidePanelEl = this.document.getElementById(this.uiConfig.dom.sideBarId);
+    if (sidePanelEl === null) return;
+
     const closeButtonEl = sidePanelEl.querySelector('.close');
     if (closeButtonEl) {
       closeButtonEl.addEventListener('click', this.eventHide);
     }
   }
 
-  __showHide(newStyleValue) {
+  private showHide(newStyleValue:string):void {
     const sidePanelEl = this.document.getElementById(this.uiConfig.dom.sideBarId);
+    if (sidePanelEl === null) return;
+
     switch (this.uiPrefs.view.location) {
       case 'left': {
         sidePanelEl.style.width = newStyleValue;
@@ -42,13 +46,13 @@ class SidebarView extends AbstractView {
     }
   }
 
-  eventHide(event) {
+  eventHide(event:Event|null) {
     if (event) event.preventDefault();
-    this.__showHide('0%');
+    this.showHide('0%');
   }
 
-  eventShow(event) {
-    this.__showHide(this.uiPrefs.view.expandedSize);
+  eventShow(event:Event|null) {
+    this.showHide(this.uiPrefs.view.expandedSize);
   }
 }
 

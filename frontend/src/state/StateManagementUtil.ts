@@ -1,7 +1,7 @@
 import debug from 'debug';
 import StateChangeListener from './StateChangeListener';
 
-const smLogger = debug('state-manager');
+const smLogger = debug('state-manager-ts');
 
 import {equalityFunction} from '../util/EqualityFunctions';
 

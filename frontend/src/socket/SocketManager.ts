@@ -1,7 +1,7 @@
 import debug from 'debug';
 import SocketListener from "./SocketListener";
 
-const sDebug = debug('socket');
+const sDebug = debug('socket-ts');
 
 class SocketManager {
     protected listener:SocketListener|null;

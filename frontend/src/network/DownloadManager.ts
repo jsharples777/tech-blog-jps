@@ -5,10 +5,7 @@ import {managerRequest, jsonRequest, queueType, RequestType} from "./Types";
 
 import debug from 'debug';
 
-const dlLogger = debug('api');
-
-
-
+const dlLogger = debug('api-ts');
 
 class DownloadManager {
   protected backgroundQueue : managerRequest[];
@@ -114,7 +111,7 @@ class DownloadManager {
       dlLogger(queueItem);
       dlLogger(`Download Manager: finished for queue item ${queueItem.requestId}`);
       // let the callback function know
-      queueItem.callback(jsonData, httpStatus);
+      queueItem.originalRequest.callback(jsonData, httpStatus);
     }
   }
 
@@ -124,19 +121,19 @@ class DownloadManager {
     if ((item.originalRequest.url !== null) && (item.originalRequest.params != null) && (item.originalRequest.callback != null)) {
       switch (item.originalRequest.type) {
         case RequestType.POST: {
-          apiUtil.apiFetchJSONWithPost(item.originalRequest.url, item.originalRequestparams, this.callbackForQueueRequest, item.queueId, item.requestId);
+          apiUtil.apiFetchJSONWithPost(item);
           break;
         }
         case RequestType.GET: {
-          apiUtil.apiFetchJSONWithGet(item.url, item.params, this.callbackForQueueRequest, item.queueId, item.requestId);
+          apiUtil.apiFetchJSONWithGet(item);
           break;
         }
         case RequestType.DELETE: {
-          apiUtil.apiFetchJSONWithDelete(item.url, item.params, this.callbackForQueueRequest, item.queueId, item.requestId);
+          apiUtil.apiFetchJSONWithDelete(item);
           break;
         }
         case RequestType.PUT: {
-          apiUtil.apiFetchJSONWithPut(item.url, item.params, this.callbackForQueueRequest, item.queueId, item.requestId);
+          apiUtil.apiFetchJSONWithPut(item);
           break;
         }
       }

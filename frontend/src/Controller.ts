@@ -1,20 +1,26 @@
 import debug from 'debug';
-import downloader from "./network/DownloadManager.ts";
-import stateManager from "./state/StateManagementUtil.js";
-import isSame from "./util/EqualityFunctions";
+import downloader from "./network/DownloadManager";
+import stateManager from "./state/StateManagementUtil";
+import {isSame} from "./util/EqualityFunctions";
 import notifier from "./notification/NotificationManager";
 import SocketListener from "./socket/SocketListener";
 import socketManager from "./socket/SocketManager";
+import StateChangeListener from "./state/StateChangeListener";
+import {jsonRequest, RequestType} from "./network/Types";
+import {BlogEntry, Comment, User} from "./AppTypes";
 
-const cLogger = debug('controller');
+const cLogger = debug('controller-ts');
 
-class Controller extends SocketListener{
+class Controller implements SocketListener, StateChangeListener {
+    protected applicationView: any;
+    protected clientSideStorage: any;
+    protected config: any;
+
     constructor() {
-        super();
     }
 
 
-    connectToApplication(applicationView, clientSideStorage) {
+    connectToApplication(applicationView: any, clientSideStorage: any) {
         this.applicationView = applicationView;
         this.clientSideStorage = clientSideStorage;
         this.config = this.applicationView.state;
@@ -26,14 +32,14 @@ class Controller extends SocketListener{
         this.callbackForCreateComment = this.callbackForCreateComment.bind(this);
 
         // state listener
-        this.stateChangeListener = this.stateChangeListener.bind(this);
+        this.stateChanged = this.stateChanged.bind(this);
 
-        stateManager.addChangeListenerForName(this.config.stateNames.entries, this.stateChangeListener);
+        stateManager.addChangeListenerForName(this.config.stateNames.entries, this);
 
         return this;
     }
 
-    stateChangeListener(name, value) {
+    stateChanged(name: string, value: any) {
         cLogger(`State changes ${name}`);
         cLogger(value);
         this.applicationView.setState({
@@ -49,44 +55,98 @@ class Controller extends SocketListener{
     * Call back functions for database operations
     *
      */
-    callbackForUsers(data, status) {
+    private callbackForUsers(data: any, status: number) {
         cLogger('callback for all users');
-        let users = [];
+        let users:User[] = [];
         if (status >= 200 && status <= 299) { // do we have any data?
             cLogger(data);
-            users = data;
+            let cbUsers = data;
+            // covert the data to the AppType User
+            cbUsers.forEach((cbUser:any) => {
+                let user:User = {
+                    id:cbUser.id,
+                    username:cbUser.username
+                }
+                users.push(user);
+            });
         }
         stateManager.setStateByName(this.config.stateNames.users, users);
     }
 
-    callbackForEntries(data, status) {
+    private static convertJSONCommentToComment(jsonComment:any):Comment {
+        let comment:Comment = {
+            id:jsonComment.id,
+            content:jsonComment.content,
+            createdBy:jsonComment.createdBy,
+            changedOn:jsonComment.changedOn,
+            commentOn:jsonComment.commentOn,
+        };
+        return comment;
+    }
+
+    private static convertJSONUserToUser(jsonUser:any):User {
+        let user:User = {
+            id:jsonUser.id,
+            username:jsonUser.username,
+        }
+        return user;
+    }
+
+    private static convertJSONEntryToBlogEntry(jsonEntry:any):BlogEntry {
+        let entry:BlogEntry = {
+            id: jsonEntry.id,
+            title:jsonEntry.title,
+            content:jsonEntry.content,
+            createdBy:jsonEntry.createdBy,
+            changedOn:jsonEntry.changedOn,
+            User:null,
+            Comments:[],
+        }
+        const cbUser:User|null = jsonEntry.User;
+        if (cbUser) {
+            entry.User = Controller.convertJSONUserToUser(cbUser);
+        }
+        const cbComments:Comment[]|null = jsonEntry.Comments;
+        if (cbComments) {
+            cbComments.forEach((cbComment:any) => {
+                let comment = Controller.convertJSONCommentToComment(cbComment);
+                entry.Comments.push(comment);
+            });
+        }
+        return entry;
+    }
+
+    private callbackForEntries(data: any, status: number) {
         cLogger('callback for all entries');
-        let entries = [];
+        let entries:BlogEntry[] = [];
         if (status >= 200 && status <= 299) { // do we have any data?
             cLogger(data);
-            entries = data;
+            data.forEach((cbEntry:any) => {
+                let entry:BlogEntry = Controller.convertJSONEntryToBlogEntry(cbEntry);
+                entries.push(entry);
+            });
         }
         stateManager.setStateByName(this.config.stateNames.entries, entries);
     }
 
-    callbackForCreateEntry(data, status) {
+    private callbackForCreateEntry(data: any, status: number) {
         cLogger('callback for create entry');
         let entry = null;
         if (status >= 200 && status <= 299) { // do we have any data?
             cLogger(data);
-            entry = data;
+            let entry:BlogEntry = Controller.convertJSONEntryToBlogEntry(data);
+            stateManager.addNewItemToState(this.config.stateNames.entries, entry);
         }
-        stateManager.addNewItemToState(this.config.stateNames.entries, entry);
     }
 
-    callbackForCreateComment(data, status) {
+    private callbackForCreateComment(data: any, status: number) {
         cLogger('callback for create comment');
         let comment = null;
         if (status >= 200 && status <= 299) { // do we have any data?
-            comment = data;
+            let comment:Comment = Controller.convertJSONCommentToComment(data);
             cLogger(comment);
             // find the corresponding entry in state
-            let entry = stateManager.findItemInState(this.config.stateNames.entries, {id: comment.commentOn}, isSame);
+            let entry = <BlogEntry|null>stateManager.findItemInState(this.config.stateNames.entries, {id: comment.commentOn}, isSame);
             cLogger(entry);
             if (entry) {
                 cLogger('callback for create comment - updating entry');
@@ -108,51 +168,51 @@ class Controller extends SocketListener{
     *
      */
 
-    getAllUsers() {
+    private getAllUsers(): void {
         cLogger('Getting All Users');
-        const jsonRequest = {
+        const jsonRequest: jsonRequest = {
             url: this.getServerAPIURL() + this.config.apis.users,
-            type: 'GET',
+            type: RequestType.GET,
             params: {},
             callback: this.callbackForUsers,
         };
         downloader.addApiRequest(jsonRequest, true);
     }
 
-    getAllEntries() {
+    private getAllEntries(): void {
         cLogger('Getting All Entries');
-        const jsonRequest = {
+        const jsonRequest: jsonRequest = {
             url: this.getServerAPIURL() + this.config.apis.entries,
-            type: 'GET',
+            type: RequestType.GET,
             params: {},
             callback: this.callbackForEntries,
         };
         downloader.addApiRequest(jsonRequest, true);
     }
 
-    apiDeleteComment(id) {
-        const deleteCommentCB = function (data, status) {
+    private apiDeleteComment(id: number):void {
+        const deleteCommentCB = function (data: any, status: number) {
             cLogger('callback for delete comment');
             if (status >= 200 && status <= 299) { // do we have any data?
                 cLogger(data);
             }
         }
 
-        if (id) {
-            const jsonRequest = {
-                url: this.getServerAPIURL() + this.config.apis.comment,
-                type: 'DELETE',
-                params: {
-                    id: id
-                },
-                callback: deleteCommentCB,
-            };
-            downloader.addApiRequest(jsonRequest);
-        }
+
+        const jsonRequest: jsonRequest = {
+            url: this.getServerAPIURL() + this.config.apis.comment,
+            type: RequestType.DELETE,
+            params: {
+                id: id
+            },
+            callback: deleteCommentCB,
+        };
+        downloader.addApiRequest(jsonRequest);
+
     }
 
-    apiDeleteEntry(entry) {
-        const deleteCB = function (data, status) {
+    private apiDeleteEntry(entry: BlogEntry):void {
+        const deleteCB = function (data: any, status: number) {
             cLogger('callback for delete entry');
             if (status >= 200 && status <= 299) { // do we have any data?
                 cLogger(data);
@@ -160,9 +220,9 @@ class Controller extends SocketListener{
         }
 
         if (entry) {
-            const jsonRequest = {
+            const jsonRequest:jsonRequest = {
                 url: this.getServerAPIURL() + this.config.apis.entries,
-                type: 'DELETE',
+                type: RequestType.DELETE,
                 params: {
                     id: entry.id
                 },
@@ -172,11 +232,11 @@ class Controller extends SocketListener{
         }
     }
 
-    apiCreateEntry(entry) {
+    private apiCreateEntry(entry:BlogEntry):void {
         if (entry) {
-            const jsonRequest = {
+            const jsonRequest:jsonRequest = {
                 url: this.getServerAPIURL() + this.config.apis.entries,
-                type: 'POST',
+                type: RequestType.POST,
                 params: entry,
                 callback: this.callbackForCreateEntry,
             };
@@ -184,11 +244,11 @@ class Controller extends SocketListener{
         }
     }
 
-    apiCreateComment(comment) {
+    private apiCreateComment(comment:Comment):void {
         if (comment) {
-            const jsonRequest = {
+            const jsonRequest:jsonRequest = {
                 url: this.getServerAPIURL() + this.config.apis.comment,
-                type: 'POST',
+                type: RequestType.POST,
                 params: comment,
                 callback: this.callbackForCreateComment,
             };
@@ -196,8 +256,8 @@ class Controller extends SocketListener{
         }
     }
 
-    apiUpdateEntry(entry) {
-        const updateCB = function (data, status) {
+    private apiUpdateEntry(entry:BlogEntry):void {
+        const updateCB = function (data: any, status: number) {
             cLogger('callback for update entry');
             if (status >= 200 && status <= 299) { // do we have any data?
                 cLogger(data);
@@ -205,9 +265,9 @@ class Controller extends SocketListener{
         }
 
         if (entry) {
-            const jsonRequest = {
+            const jsonRequest:jsonRequest = {
                 url: this.getServerAPIURL() + this.config.apis.entries,
-                type: 'PUT',
+                type: RequestType.PUT,
                 params: entry,
                 callback: updateCB,
             };
@@ -220,17 +280,20 @@ class Controller extends SocketListener{
     * Simple Application state (URL, logged in user)
     *
      */
-    getServerAPIURL() {
+    private getServerAPIURL():string {
         let result = "/api";
+        // @ts-ignore
         if ((window.ENV) && (window.ENV.serverURL)) {
+            // @ts-ignore
             result = window.ENV.serverURL;
         }
         return result;
     }
 
-    isLoggedIn() {
+    public isLoggedIn():boolean {
         let isLoggedIn = false;
         try {
+            // @ts-ignore
             if (loggedInUserId) {
                 isLoggedIn = true;
             }
@@ -240,10 +303,12 @@ class Controller extends SocketListener{
         return isLoggedIn;
     }
 
-    getLoggedInUserId() {
+    public getLoggedInUserId():number {
         let result = -1;
         try {
+            // @ts-ignore
             if (loggedInUserId) {
+                // @ts-ignore
                 result = loggedInUserId;
             }
         } catch (error) {
@@ -255,7 +320,7 @@ class Controller extends SocketListener{
     /*
       Get the base data for the application (users, entries)
      */
-    initialise() {
+    public initialise():void {
         cLogger('Initialising data state');
         // listen for socket events
         socketManager.setListener(this);
@@ -266,13 +331,13 @@ class Controller extends SocketListener{
     }
 
     // Lets delete a comment
-    deleteComment(id) {
+    private deleteComment(id:number) {
         let entry = stateManager.getStateByName(this.config.stateNames.selectedEntry);
         if (entry) {
             cLogger(`Handling delete comment for ${entry.id} and comment ${id}`);
             // find the comment in the entry and remove it from the state
             let comments = entry.Comments;
-            const foundIndex = comments.findIndex(element => element.id === id);
+            const foundIndex = comments.findIndex((element: any) => element.id === id);
             if (foundIndex >= 0) {
                 // remove comment from the array
                 cLogger('Found comment in entry - removing');
@@ -286,7 +351,7 @@ class Controller extends SocketListener{
         this.apiDeleteComment(id);
     }
 
-    deleteEntry(entry) {
+    public deleteEntry(entry:BlogEntry):void {
         if (entry) {
             cLogger(`Handling delete entry for ${entry.id}`);
             // update the state manager
@@ -296,7 +361,7 @@ class Controller extends SocketListener{
         }
     }
 
-    updateEntry(entry) {
+    public updateEntry(entry:BlogEntry):void {
         if (entry) {
             cLogger(entry);
             if (entry.id) {
@@ -313,12 +378,10 @@ class Controller extends SocketListener{
         }
     }
 
-    addComment(comment) {
+    public addComment(comment:Comment):void  {
         if (comment) {
             cLogger(comment);
             cLogger(`Handling create for comment`);
-
-
             this.apiCreateComment(comment);
         }
     }
@@ -329,17 +392,17 @@ class Controller extends SocketListener{
     *
      */
 
-    handleMessage(message) {
+    public handleMessage(message:string):void {
         cLogger(message);
     }
 
-    getCurrentUser() {
+    public getCurrentUser():number{
         return this.getLoggedInUserId();
     }
 
-    handleDataChangedByAnotherUser(message) {
+    public handleDataChangedByAnotherUser(message:any) {
         cLogger(`Handling data change ${message.type} on object type ${message.objectType} made by user ${message.user}`);
-        const changeUser = stateManager.findItemInState(this.config.stateNames.users,{id:message.user},isSame);
+        const changeUser = stateManager.findItemInState(this.config.stateNames.users, {id: message.user}, isSame);
         let stateObj = message.data;
         cLogger(stateObj);
         // ok lets work out where this change belongs
@@ -350,7 +413,7 @@ class Controller extends SocketListener{
                         case "Comment": {
                             // updating comments is more tricky as it is a sub object of the blog entry
                             // find the entry in question
-                            const changedEntry = stateManager.findItemInState(this.config.stateNames.entries, {id: stateObj.commentOn}, isSame);
+                            const changedEntry = <BlogEntry|null>stateManager.findItemInState(this.config.stateNames.entries, {id: stateObj.commentOn}, isSame);
                             if (changedEntry) {
                                 // add the new comment
                                 changedEntry.Comments.push(stateObj);
@@ -367,7 +430,7 @@ class Controller extends SocketListener{
                                 if (changeUser) {
                                     username = changeUser.username;
                                 }
-                                notifier.show(changedEntry.title,`${username} added comment ${stateObj.content}`);
+                                notifier.show(changedEntry.title, `${username} added comment ${stateObj.content}`);
                             }
                             break;
                         }
@@ -379,14 +442,14 @@ class Controller extends SocketListener{
                                 username = changeUser.username;
                             }
 
-                            notifier.show(stateObj.title,`${username} added new entry`);
+                            notifier.show(stateObj.title, `${username} added new entry`);
                             break;
                         }
                         case "User": {
                             // add the new item to the state
                             stateManager.addNewItemToState(this.config.stateNames.users, stateObj);
 
-                            notifier.show(stateObj.username,`${stateObj.username} has just registered.`,'message');
+                            notifier.show(stateObj.username, `${stateObj.username} has just registered.`, 'message');
                             break;
                         }
                     }
@@ -408,12 +471,12 @@ class Controller extends SocketListener{
                         case "Comment": {
                             // removing comments is more tricky as it is a sub object of the blog entry
                             // find the entry in question
-                            const changedEntry = stateManager.findItemInState(this.config.stateNames.entries, {id: stateObj.commentOn}, isSame);
+                            const changedEntry = <BlogEntry|null>stateManager.findItemInState(this.config.stateNames.entries, {id: stateObj.commentOn}, isSame);
                             cLogger(changedEntry);
                             if (changedEntry) {
                                 // remove the comment
                                 let comments = changedEntry.Comments;
-                                const foundIndex = comments.findIndex(element => element.id === stateObj.id);
+                                const foundIndex = comments.findIndex((element:any) => element.id === stateObj.id);
                                 if (foundIndex >= 0) {
                                     // remove comment from the array
                                     cLogger('Found comment in entry - removing');
@@ -436,7 +499,7 @@ class Controller extends SocketListener{
                         }
                         case "BlogEntry": {
                             cLogger(`Deleting Blog Entry with id ${stateObj.id}`);
-                            const deletedEntry = stateManager.findItemInState(this.config.stateNames.entries,stateObj,isSame);
+                            const deletedEntry = stateManager.findItemInState(this.config.stateNames.entries, stateObj, isSame);
                             cLogger(deletedEntry);
                             if (deletedEntry) {
                                 cLogger(`Deleting Blog Entry with id ${deletedEntry.id}`);
@@ -463,9 +526,9 @@ class Controller extends SocketListener{
         }
 
     }
+
 }
 
-const
-    controller = new Controller();
+const controller = new Controller();
 
 export default controller;

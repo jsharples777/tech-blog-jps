@@ -1,7 +1,7 @@
 import debug from 'debug';
 import {ManagerCallbackFunction, managerRequest, queueType} from "./Types";
 
-const apiLogger = debug('api');
+const apiLogger = debug('api-ts');
 
 
 
@@ -70,26 +70,26 @@ class ApiUtil {
   }
 
   public apiFetchJSONWithDelete(request:managerRequest):void {
-    apiLogger(`Executing DELETE fetch with URL ${url} with id ${request.originalRequest.params.id}`);
+    apiLogger(`Executing DELETE fetch with URL ${request.originalRequest.url} with id ${request.originalRequest.params.id}`);
     const delParameters = {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
     };
-    if (request.originalRequest.params.id) url += `/${request.originalRequest.params.id}`;
+    if (request.originalRequest.params.id) request.originalRequest.url += `/${request.originalRequest.params.id}`;
 
-    this.fetchJSON(url, delParameters, callback, queueId, requestId);
+    this.fetchJSON(request.originalRequest.url, delParameters, request.callback, request.queueType, request.requestId);
   }
 
   public apiFetchJSONWithPut(request:managerRequest) {
-    apiLogger(`Executing PUT fetch with URL ${url} with id ${request.originalRequest.params.id}`);
+    apiLogger(`Executing PUT fetch with URL ${request.originalRequest.url} with id ${request.originalRequest.params.id}`);
     const putParameters = {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...request.originalRequest.params }),
     };
-    if (request.originalRequest.params.id) url += `/${request.originalRequest.params.id}`;
+    if (request.originalRequest.params.id) request.originalRequest.url += `/${request.originalRequest.params.id}`;
 
-    this.fetchJSON(url, putParameters, callback, queueId, requestId);
+    this.fetchJSON(request.originalRequest.url, putParameters, request.callback, request.queueType, request.requestId);
   }
 }
 

@@ -6,14 +6,15 @@
   "scripts": {
     "tsc": "tsc",
     "build": "webpack --mode production",
-    "webpack_compile": "webpack --mode development",
-    "webpack_watch": "webpack --mode development --watch",
-    "compile": "babel src --out-dir ../backend/public/js  --verbose --extensions '.jsx,.js,.ts,.tsx'",
-    "watch": "babel src --out-dir ../backend/public/js --watch --verbose  --extensions '.jsx,.js,.ts,.tsx'",
+    "wpcompile": "webpack --mode development",
+    "wpwatch": "webpack --mode development --watch",
+    "compile": "babel src --out-dir ./dist/js  --verbose --extensions '.jsx,.js,.ts,.tsx'",
+    "watch": "babel src --out-dir ./dist/js --watch --verbose  --extensions '.jsx,.js,.ts,.tsx'",
     "lint": "eslint --ext js,jsx,tsx,ts --fix ."
   },
   "dependencies": {
     "debug": "^4.3.2",
+    "loader-utils": "^2.0.0",
     "moment": "^2.29.1",
     "path": "^0.12.7",
     "prop-types": "^15.7.2",
@@ -28,7 +29,7 @@
     "@babel/preset-react": "^7.14.5",
     "@babel/preset-typescript": "^7.14.5",
     "@types/debug": "^4.1.7",
-    "@types/jquery": "^3.5.6",
+    "@types/prop-types": "^15.7.4",
     "@types/react": "^17.0.15",
     "@types/react-dom": "^17.0.9",
     "@types/socket.io": "^3.0.2",

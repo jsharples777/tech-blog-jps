@@ -1,81 +1,68 @@
 import debug from 'debug';
-import browserUtil from '../util/BrowserUtil.js';
+import browserUtil from '../util/BrowserUtil';
+import StateChangeListener from "../state/StateChangeListener";
 
-const avLogger = new debug('view')
+const avLogger = debug('view-ts')
 
-export default class AbstractView {
-  constructor(applicationView, htmlDocument, uiConfig, uiPrefs) {
+export default abstract class AbstractView implements StateChangeListener {
+  protected applicationView:any;
+  protected document:HTMLDocument;
+  protected uiConfig:any;
+  protected uiPrefs:any;
+
+  protected config: any;
+
+  protected constructor(applicationView:any, htmlDocument:HTMLDocument, uiConfig:any, uiPrefs:any) {
     this.applicationView = applicationView;
     this.document = document;
     this.uiConfig = uiConfig;
     this.uiPrefs = uiPrefs;
+    this.config = applicationView.state;
 
     // state change listening
-    this.stateChangedHandler = this.stateChangedHandler.bind(this);
+    this.stateChanged = this.stateChanged.bind(this);
 
     // event handlers
     this.eventStartDrag = this.eventStartDrag.bind(this);
     this.eventClickItem = this.eventClickItem.bind(this);
   }
 
-  onDocumentLoaded() {
-    throw new Error('implement in sub-class');
-  }
+  public abstract onDocumentLoaded():void;
 
-  stateChangedHandler(name, value) {
-    this.updateView(name, value);
-  }
 
   /* abstract */
-  updateView(name, newState) {
-    throw new Error('Must be implemented in subclass');
-  }
+  protected abstract eventClickItem(event:MouseEvent):void;
 
-  eventStartDrag(event) {
+  protected abstract getDragData(event:DragEvent):any;
+
+  protected abstract getIdForStateItem(name:string, item:any):string;
+  protected abstract getLegacyIdForStateItem(name:string, item:any):string;
+  protected abstract getDisplayValueForStateItem(name:string, item:any):string;
+  protected abstract getModifierForStateItem(name:string, item:any):string;
+  protected abstract getSecondaryModifierForStateItem(name:string, item:any):string;
+  protected abstract updateView(name:string, newState:any):void;
+
+
+  protected eventStartDrag(event:DragEvent) {
     avLogger('Abstract View : drag start', 10);
     const data = JSON.stringify(this.getDragData(event));
     avLogger(data, 10);
+    // @ts-ignore
     event.dataTransfer.setData(this.applicationView.state.ui.draggable.draggableDataKeyId, data);
   }
 
-  eventClickItem(event) {
-    throw new Error('Must be implemented in subclass');
-  }
 
-  getDragData(event) {
-    throw new Error('Must be implemented in subclass');
-  }
 
-  getIdForStateItem(name, item) {
-    throw new Error('Must be implemented in subclass');
-  }
-
-  getLegacyIdForStateItem(name, item) {
-    throw new Error('Must be implemented in subclass');
-  }
-
-  getDisplayValueForStateItem(name, item) {
-    throw new Error('Must be implemented in subclass');
-  }
-
-  getModifierForStateItem(name, item) {
-    throw new Error('Must be implemented in subclass');
-  }
-
-  getSecondaryModifierForStateItem(name, item) {
-    throw new Error('Must be implemented in subclass');
-  }
-
-  createResultsForState(name, newState) {
+  protected createResultsForState(name:string, newState:any):void {
     avLogger('Abstract View : creating Results', 10);
     avLogger(newState);
     const domConfig = this.uiConfig.dom;
     // remove the previous items from list
     const viewEl = document.getElementById(domConfig.resultsId);
-    browserUtil.removeAllChildren(viewEl);
+    if (viewEl) browserUtil.removeAllChildren(viewEl);
 
     // add the new children
-    newState.map((item, index) => {
+    newState.map((item:any, index:number) => {
 
       const childEl = this.document.createElement(domConfig.resultsElementType);
       browserUtil.addRemoveClasses(childEl,domConfig.resultsClasses);
@@ -163,7 +150,11 @@ export default class AbstractView {
         childEl.addEventListener('click', this.eventClickItem);
       }
       avLogger(`Abstract View: Adding child ${item.id}`);
-      viewEl.appendChild(childEl);
+      if (viewEl) viewEl.appendChild(childEl);
     });
+  }
+
+  public stateChanged(name: string, newValue: any): void {
+    this.updateView(name, newValue);
   }
 }

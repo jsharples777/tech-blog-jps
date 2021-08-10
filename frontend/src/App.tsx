@@ -5,11 +5,11 @@ import ReactDOM from 'react-dom';
 import debug from 'debug';
 import moment from 'moment';
 
-import controller from './Controller.js';
+import controller from './Controller';
 import CommentSidebarView from "./component/CommentSidebarView";
-import BlogEntry from "./component/BlogEntry.jsx";
+import BlogEntry from "./component/BlogEntryView";
 import stateManager from "./state/StateManagementUtil";
-import isSame from "./util/EqualityFunctions";
+import {isSame} from "./util/EqualityFunctions";
 import DetailsSidebarView from "./component/DetailsSidebarView";
 
 
@@ -160,8 +160,6 @@ class Root extends React.Component{
         const blog = entriesToDisplay.map((entry, index) =>
             <BlogEntry
                 key={index}
-                uiConfig={this.state.ui.blogEntry}
-                uiPrefs={this.state.uiPrefs.blogEntry}
                 entry={entry}
                 showCommentsHandler={this.handleSelectEntryComments}
                 editEntryHandler={this.handleShowEditEntry}
@@ -175,13 +173,13 @@ class Root extends React.Component{
         );
     }
 
-    cancelDelete(event) {
+    cancelDelete(event:Event) {
         this.modalEl.classList.remove(this.state.ui.alert.showClass);
         this.modalEl.classList.add(this.state.ui.alert.hideClass);
         event.preventDefault();
     }
 
-    confirmDelete(event) {
+    confirmDelete(event:Event) {
         this.modalEl.classList.remove(this.state.ui.alert.showClass);
         this.modalEl.classList.add(this.state.ui.alert.hideClass);
         event.preventDefault();
@@ -235,7 +233,7 @@ class Root extends React.Component{
         this.detailsView.eventHide(null);
     }
 
-    handleShowMyEntries(event) {
+    handleShowMyEntries(event:Event) {
         logger('Handling Show My Entries');
         this.hideAllSideBars();
         if (!controller.isLoggedIn()) {
@@ -245,13 +243,13 @@ class Root extends React.Component{
         this.setState({applyUserFilter:true});
     }
 
-    handleAllEntries(event) {
+    handleAllEntries(event:Event) {
         logger('Handling Show All Entries');
         this.setState({applyUserFilter:false});
         this.hideAllSideBars();
     }
 
-    handleAddEntry(event) {
+    handleAddEntry(event:Event) {
         logger('Handling Add Entry');
         event.preventDefault();
         this.hideAllSideBars();
@@ -283,7 +281,7 @@ class Root extends React.Component{
         this.detailsView.eventShow(event);
     }
 
-    handleAddComment(event) {
+    handleAddComment(event:Event) {
         logger('Handling Add Comment');
         event.preventDefault();
         // get the comment element
@@ -383,7 +381,7 @@ class Root extends React.Component{
     }
 }
 
-//localStorage.debug = 'app view controller socket api local-storage state-manager';
+localStorage.debug = 'app view-ts controller-ts socket-ts api-ts local-storage-ts state-manager-ts view-ts:blogentry view-ts:comments view-ts:details';
 debug.log = console.info.bind(console);
 
 const element = <Root className="container-fluid justify-content-around"/>;

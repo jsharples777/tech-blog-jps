@@ -5,12 +5,14 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "strict": true,
-    "target": "es2015",
+    "target": "es5",
     "allowJs": true,
-    "noEmit": true,
+    "noEmit": false,
+    "outDir": "./dist/js",
     "esModuleInterop": true,
     "declaration": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "allowSyntheticDefaultImports": true
   },
   "include": [
     "src"

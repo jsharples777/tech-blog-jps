@@ -5,3 +5,4 @@
 /frontend/node_modules/
 /git-crypt-key
 /frontend/dist/
+/backend/dist/

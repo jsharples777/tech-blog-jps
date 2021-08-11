@@ -114,7 +114,7 @@ app.use('/api',apiRoutes);
 // Setup authentication
 debug('Setting up User model and authentication with Passport');
 //load passport strategies
-require('./passport/passport.js')(passport, User);
+require('./passport/passport.ts')(passport, User);
 
 // route for the env.js file being served to the client
 debug('Setting the environment variables for the browser to access');

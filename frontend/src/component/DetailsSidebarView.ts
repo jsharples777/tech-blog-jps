@@ -3,6 +3,7 @@ import debug from 'debug';
 
 import SidebarView from './SidebarView';
 import stateManager from '../state/StateManagementUtil';
+import {BlogEntry} from "../AppTypes";
 
 const viewLogger = debug('view-ts:details');
 
@@ -62,14 +63,15 @@ class DetailsSidebarView extends SidebarView{
   updateView(name:string, newState:any) {
     viewLogger('Handling update of Details Sidebar View');
     viewLogger(newState);
-    if (newState && newState.title) {
-      if (this.titleEl) this.titleEl.value = newState.title;
-      if (this.contentEl) this.contentEl.value = newState.content;
-      if (this.changeOnEl) this.changeOnEl.innerText = "Last Changed On: " + moment(newState.changedOn,'YYYYMMDDHHmmss').format('DD/MM/YYYY');
+    let entry = <BlogEntry>newState;
+    if (entry && entry.title) {
+      if (this.titleEl) this.titleEl.value = entry.title;
+      if (this.contentEl) this.contentEl.value = entry.content;
+      if (this.changeOnEl) this.changeOnEl.innerText = "Last Changed On: " + moment(entry.changedOn,'YYYYMMDDHHmmss').format('DD/MM/YYYY');
     }
     else {
       if (this.titleEl) this.titleEl.value = '';
-      if (this.contentEl) this.contentEl.innerText = '';
+      if (this.contentEl) this.contentEl.value = '';
       if (this.changeOnEl) this.changeOnEl.innerText = "Last Changed On: ";
     }
   }

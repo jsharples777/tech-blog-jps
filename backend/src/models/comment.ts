@@ -1,24 +1,22 @@
-// const {Sequelize} = require('sequelize');
-// const sequelize = require('../db/connection.ts');
-// const User = require('./user');
-// const BlogEntry = require('./blogentry');
-import Sequelize = require('sequelize');
-import sequelize = require('../db/connection.js');
-import User = require('./user');
-import BlogEntry = require('./blogentry');
+import { Model, DataTypes }  from 'sequelize';
+import sequelize from '../db/connection';
+import User from './user';
+import BlogEntry from "./blogentry";
 
-const Comment = sequelize.define('Comment', {
+class Comment extends Model {}
+
+Comment.init({
         id: {
             autoIncrement: true,
             primaryKey: true,
-            type: Sequelize.INTEGER
+            type: DataTypes.INTEGER
         },
         content: {
-            type: Sequelize.STRING
+            type: DataTypes.STRING
         },
 
         createdBy: {
-            type: Sequelize.INTEGER,
+            type: DataTypes.INTEGER,
             references: {
                 model: User,
                 key: "id"
@@ -26,7 +24,7 @@ const Comment = sequelize.define('Comment', {
         },
 
         commentOn: {
-            type: Sequelize.INTEGER,
+            type: DataTypes.INTEGER,
             references: {
                 model: BlogEntry,
                 key: "id"
@@ -34,7 +32,7 @@ const Comment = sequelize.define('Comment', {
         },
 
         changedOn: {
-            type: Sequelize.BIGINT,
+            type: DataTypes.BIGINT,
             allowNull: false
         }
     },
@@ -46,6 +44,4 @@ const Comment = sequelize.define('Comment', {
         modelName: 'comment',
     });
 
-//
-// module.exports = Comment;
 export = Comment;

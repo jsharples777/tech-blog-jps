@@ -1,31 +1,31 @@
-// const {Sequelize} = require('sequelize');
-// const sequelize = require('../db/connection.ts');
-import Sequelize = require('sequelize');
-import sequelize = require('../db/connection.js');
+import { Model, DataTypes }  from 'sequelize';
+import sequelize from '../db/connection';
 
-const User = sequelize.define('User', {
+class User extends Model {}
+
+User.init({
 
     id: {
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: DataTypes.INTEGER
     },
 
     username: {
-        type: Sequelize.TEXT
+        type: DataTypes.TEXT
     },
 
     password: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         allowNull: false
     },
 
     last_login: {
-        type: Sequelize.DATE
+        type: DataTypes.DATE
     },
 
     status: {
-        type: Sequelize.ENUM('active', 'inactive'),
+        type: DataTypes.ENUM('active', 'inactive'),
         defaultValue: 'active'
     }},
     {

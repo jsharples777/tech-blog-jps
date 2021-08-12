@@ -1,13 +1,11 @@
-// const bCrypt = require('bcrypt-nodejs');
-// const socketManager = require("../util/SocketManager");
-import bCrypt = require('bcrypt-nodejs');
-import socketManager = require("../util/SocketManager");
+import bCrypt from 'bcrypt-nodejs';
+import socketManager from '../util/SocketManager';
 import User from '../models/user';
-import passport from 'passport';
 import {Request} from "express";
 
-//module.exports = function (passport, user) {
-function setupPassport(passport:passport, user:User) {
+
+// @ts-ignore
+function setupPassport(passport:any, user:User) {
     const User = user;
     const LocalStrategy = require('passport-local').Strategy;
 
@@ -25,6 +23,7 @@ function setupPassport(passport:passport, user:User) {
 
 
 
+            // @ts-ignore
             User.findOne({
                 where: {
                     username: username
@@ -42,12 +41,15 @@ function setupPassport(passport:passport, user:User) {
                             password: userPassword,
                         };
 
-                    User.create(data).then(function (newUser, created) {
+                    // @ts-ignore
+                    User.create(data).then(function (newUser:User) {
+                        // @ts-ignore
                         User.findOne({
                             where: {
                                 username: username
                             }
                         }).then(function (user:User) {
+                            // @ts-ignore
                             let message = {
                                 type: "create",
                                 objectType: "User",
@@ -85,6 +87,7 @@ function setupPassport(passport:passport, user:User) {
                 return bCrypt.compareSync(password, hashedPassword);
             }
 
+            // @ts-ignore
             User.findOne({
                 where: {
                     username: username
@@ -96,6 +99,7 @@ function setupPassport(passport:passport, user:User) {
                     });
                 }
 
+                // @ts-ignore
                 if (!isValidPassword(user.password, password)) {
                     return done(null, false, {
                         message: 'Username and/or password is incorrect'

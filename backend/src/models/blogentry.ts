@@ -1,35 +1,34 @@
-// const Sequelize = require('sequelize');
-// const sequelize = require('../db/connection.ts');
-// const User = require('./user');
-import Sequelize = require('sequelize');
-import sequelize = require('../db/connection.js');
-import User = require('./user');
+import { Model, DataTypes }  from 'sequelize';
+import sequelize from '../db/connection';
+import User from './user';
 
-const BlogEntry = sequelize.define('BlogEntry', {
+class BlogEntry extends Model {}
+
+BlogEntry.init({
     id: {
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: DataTypes.INTEGER
     },
 
     title: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         allowNull:false
     },
 
     content: {
-        type: Sequelize.STRING
+        type: DataTypes.STRING
     },
 
     createdBy: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         references: {
             model:User,
             key:"id"
         }
     },
     changedOn: {
-        type: Sequelize.BIGINT,
+        type: DataTypes.BIGINT,
         allowNull:false
     }
 
@@ -42,5 +41,4 @@ const BlogEntry = sequelize.define('BlogEntry', {
         modelName: 'blogentry',
     });
 
-//module.exports = BlogEntry;
 export = BlogEntry;

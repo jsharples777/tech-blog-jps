@@ -8,4 +8,4 @@ BlogEntry.hasMany(Comment, {foreignKey: 'commentOn', onDelete:'cascade'});
 
 BlogEntry.belongsTo(User,{foreignKey: 'createdBy'})
 
-export = {User,BlogEntry,Comment};
+export {User,BlogEntry,Comment};

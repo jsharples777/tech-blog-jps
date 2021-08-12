@@ -1,9 +1,9 @@
-const fs = require('fs');
+import fs, {WriteStream} from 'fs';
 
 class Logger {
-    static debugOn = true;
-    static debugDepth = 1000;
-    static logFile = null;
+    static debugOn:boolean = true;
+    static debugDepth:number = 1000;
+    static logFile:WriteStream;
 
     static getLogFile() {
         if (Logger.logFile === null) {
@@ -12,7 +12,7 @@ class Logger {
         return Logger.logFile;
     }
 
-    static log(message, debugDepth = 5) {
+    static log(message:string, debugDepth = 5) {
         if ((message === null) || (message === undefined)) return;
         if (!this.debugOn) return;
         if (debugDepth > this.debugDepth) return;
@@ -22,7 +22,7 @@ class Logger {
         }
     }
 
-    static setLevel(newLevel) {
+    static setLevel(newLevel:number) {
         Logger.debugDepth = newLevel;
     }
 
@@ -37,3 +37,4 @@ class Logger {
 }
 
 module.exports = {Logger};
+export = Logger;

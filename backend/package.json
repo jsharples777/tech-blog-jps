@@ -6,7 +6,11 @@
   "scripts": {
     "compile": "tsc",
     "watch": "tsc-watch",
+    "build": "webpack --mode production",
+    "wpcompile": "webpack --mode development",
+    "wpwatch": "webpack --mode development --watch",
     "start": "nodemon -e js,json,graphql,env -w . -w .env  -w dist -w server.js dist/js/server.js",
+    "server": "nodemon -e js,json,env -w . -w .env  -w dist -w server.js dist/server.bundle.js",
     "lint": "eslint --ignore-pattern dist --fix ."
   },
   "dependencies": {
@@ -68,7 +72,8 @@
     "ts-loader": "^9.2.5",
     "ts-node": "^10.2.0",
     "tsc-watch": "^4.4.0",
-    "typescript": "^4.3.5"
+    "typescript": "^4.3.5",
+    "webpack-node-externals": "^3.0.0"
   },
   "repository": {
     "type": "git",

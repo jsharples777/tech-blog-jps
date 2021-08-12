@@ -50,12 +50,7 @@ function setupPassport(passport:any, user:User) {
                             }
                         }).then(function (user:User) {
                             // @ts-ignore
-                            let message = {
-                                type: "create",
-                                objectType: "User",
-                                data: user,
-                                user: user.id
-                            }
+                            let message = {type: "create", objectType: "User", data: user, user: user.id}
                             socketManager.sendMessage(message);
 
                         });
@@ -116,16 +111,19 @@ function setupPassport(passport:any, user:User) {
 
     //serialize
     passport.serializeUser(function(user:User, done:any) {
+        // @ts-ignore
         done(null, user.id);
     });
 
 
     // deserialize user
     passport.deserializeUser(function(id:number, done:any) {
+        // @ts-ignore
         User.findByPk(id).then(function(user:User) {
             if (user) {
                 done(null, user.get());
             } else {
+                // @ts-ignore
                 done(user.errors, null);
             }
         });

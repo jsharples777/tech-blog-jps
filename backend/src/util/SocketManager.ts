@@ -1,8 +1,7 @@
-//const socketDebug = require('debug')('socket');
-//const {Server} = require("socket.io");
 import debug = require('debug');
 import {Server}  from 'socket.io';
 import {Server as httpServer} from 'http';
+import DataMessage from "./DataMessage";
 
 const socketDebug = debug('socket');
 
@@ -33,7 +32,7 @@ class SocketManager {
         });
     }
 
-    public sendMessage(message:any):void {
+    public sendMessage(message:DataMessage):void {
         socketDebug("Sending data " + message);
         if (this.io) this.io.emit('data', JSON.stringify(message));
     }

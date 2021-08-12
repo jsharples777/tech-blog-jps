@@ -1,13 +1,16 @@
-const express = require('express');
-const passport = require('passport');
-const User = require('../models/user');
-const debug = require('debug')('route');
-const setupPassport = require('../passport/passport');
+import express from 'express';
+import passport from 'passport';
+import User from '../models/user';
+import debug from 'debug';
+import setupPassport from '../passport/passport';
 
+// @ts-ignore
 setupPassport(passport,User);
 
+const rDebug = debug('route');
+
 const router = express.Router();
-const auth = require('./auth');
+import auth from './auth';
 
 /* GET home page. */
 router.get('/', (req, res, next) => {
@@ -55,4 +58,4 @@ router.get('/test', (req, res) => {
   res.send('Hello World');
 });
 
-module.exports = router;
+export = router;

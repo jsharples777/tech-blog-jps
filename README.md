@@ -28,7 +28,7 @@ If the user is idle, the session expires in 30 minutes.
 
 # Usage
 
-1. To execute the application, use a command line interface (CLI) such as terminal (or in windows command), goto the `backend` directory and execute `npm run start` or alternatively `node src/server.js`
+1. To execute the application, use a command line interface (CLI) such as terminal (or in windows command), goto the `backend` directory and execute `npm run start` or alternatively `node src/server.ts`
 2. Open a web browser and navigate to the homepage of the web application ([default is](http://localhost:3000))
 
 

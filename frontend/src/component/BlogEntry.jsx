@@ -36,10 +36,10 @@ export default class BlogEntry extends React.Component {
                     </button>
             } else {
                 editButton = <button type="button" className="btn-outline-secondary btn-sm rounded p-1 mr-2 "
-                                     disabled>&nbsp;&nbsp;Edit &nbsp;<i className="fas fa-edit"></i>&nbsp;&nbsp;
+                                     entry-id={entry.id} disabled>&nbsp;&nbsp;Edit &nbsp;<i className="fas fa-edit"></i>&nbsp;&nbsp;
                              </button>
                 deleteButton = <button type="button" className="btn-outline-secondary btn-sm rounded p-1 mr-2"
-                                       disabled>&nbsp;&nbsp;Delete &nbsp;
+                                       entry-id={entry.id} disabled>&nbsp;&nbsp;Delete &nbsp;
                                  <i className="fas fa-trash-alt"></i>&nbsp;&nbsp;
                                </button>
             }

@@ -63,7 +63,7 @@ class DetailsSidebarView extends SidebarView {
     }
     else {
       this.titleEl.value = '';
-      this.contentEl.innerText = '';
+      this.contentEl.value = '';
       this.changeOnEl.innerText = "Last Changed On: ";
     }
   }

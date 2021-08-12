@@ -386,7 +386,7 @@ class Root extends React.Component{
 //localStorage.debug = 'app view controller api local-storage state-manager';
 //localStorage.debug = 'app view controller state-manager view:comments view:blogentry view:details';
 //localStorage.debug = 'app view controller socket';
-debug.log = console.info.bind(console);
+//debug.log = console.info.bind(console);
 
 const element = <Root className="container-fluid justify-content-around"/>;
 

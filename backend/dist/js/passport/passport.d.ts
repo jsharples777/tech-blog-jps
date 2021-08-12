@@ -1,3 +1,3 @@
-import User from '../models/user';
-declare function setupPassport(passport: any, user: User): void;
+import Account from '../models/account';
+declare function setupPassport(passport: any, user: Account): void;
 export = setupPassport;

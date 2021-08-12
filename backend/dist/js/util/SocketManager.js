@@ -1,39 +1,37 @@
 "use strict";
-var debug = require("debug");
-var socket_io_1 = require("socket.io");
-var socketDebug = debug('socket');
-var SocketManager = /** @class */ (function () {
-    function SocketManager() {
+const debug = require("debug");
+const socket_io_1 = require("socket.io");
+const socketDebug = debug('socket');
+class SocketManager {
+    constructor() {
         this.io = null;
     }
-    SocketManager.prototype.connectToServer = function (httpServer) {
+    connectToServer(httpServer) {
         socketDebug('Connecting up to the HTTP server');
         this.io = new socket_io_1.Server(httpServer);
-    };
-    SocketManager.prototype.listen = function () {
-        var _this = this;
+    }
+    listen() {
         socketDebug('starting to listen for connections');
         if (this.io)
-            this.io.on('connection', function (socket) {
+            this.io.on('connection', (socket) => {
                 socketDebug('Sockets: a user connected');
-                socket.on('disconnect', function () {
+                socket.on('disconnect', () => {
                     socketDebug('Sockets: user disconnected');
                 });
-                socket.on('message', function (msg) {
+                socket.on('message', (msg) => {
                     socketDebug("Sockets: Received message " + msg);
-                    if (_this.io)
-                        _this.io.emit('message', msg);
+                    if (this.io)
+                        this.io.emit('message', msg);
                     socketDebug("Sockets: Sending message " + msg);
                 });
             });
-    };
-    SocketManager.prototype.sendMessage = function (message) {
+    }
+    sendMessage(message) {
         socketDebug("Sending data " + message);
         if (this.io)
             this.io.emit('data', JSON.stringify(message));
-    };
-    return SocketManager;
-}());
-var socketManager = new SocketManager();
+    }
+}
+let socketManager = new SocketManager();
 module.exports = socketManager;
 //# sourceMappingURL=SocketManager.js.map

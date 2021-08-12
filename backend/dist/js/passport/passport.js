@@ -2,19 +2,19 @@
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var bcrypt_nodejs_1 = __importDefault(require("bcrypt-nodejs"));
-var SocketManager_1 = __importDefault(require("../util/SocketManager"));
+const bcrypt_nodejs_1 = __importDefault(require("bcrypt-nodejs"));
+const SocketManager_1 = __importDefault(require("../util/SocketManager"));
 // @ts-ignore
 function setupPassport(passport, user) {
-    var User = user;
-    var LocalStrategy = require('passport-local').Strategy;
+    const User = user;
+    const LocalStrategy = require('passport-local').Strategy;
     // Register strategy
     passport.use('local-register', new LocalStrategy({
         usernameField: 'username',
         passwordField: 'password',
         passReqToCallback: true // allows us to pass back the entire request to the callback
     }, function (req, username, password, done) {
-        var generateHash = function (password) {
+        const generateHash = function (password) {
             return bcrypt_nodejs_1.default.hashSync(password, bcrypt_nodejs_1.default.genSaltSync(8));
         };
         // @ts-ignore
@@ -29,8 +29,8 @@ function setupPassport(passport, user) {
                 });
             }
             else {
-                var userPassword = generateHash(password);
-                var data = {
+                const userPassword = generateHash(password);
+                const data = {
                     username: username,
                     password: userPassword,
                 };
@@ -43,7 +43,7 @@ function setupPassport(passport, user) {
                         }
                     }).then(function (user) {
                         // @ts-ignore
-                        var message = { type: "create", objectType: "User", data: user, user: user.id };
+                        let message = { type: "create", objectType: "User", data: user, user: user.id };
                         SocketManager_1.default.sendMessage(message);
                     });
                     if (!newUser) {
@@ -62,8 +62,8 @@ function setupPassport(passport, user) {
         passwordField: 'password',
         passReqToCallback: true // allows us to pass back the entire request to the callback
     }, function (req, username, password, done) {
-        var User = user;
-        var isValidPassword = function (hashedPassword, password) {
+        const User = user;
+        const isValidPassword = function (hashedPassword, password) {
             return bcrypt_nodejs_1.default.compareSync(password, hashedPassword);
         };
         // @ts-ignore
@@ -83,7 +83,7 @@ function setupPassport(passport, user) {
                     message: 'Username and/or password is incorrect'
                 });
             }
-            var userinfo = user.get();
+            const userinfo = user.get();
             return done(null, userinfo);
         }).catch(function (err) {
             return done(err);

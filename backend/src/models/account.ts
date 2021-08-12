@@ -1,15 +1,11 @@
 import {DataTypes, Model} from 'sequelize';
 import sequelize from '../db/connection';
 
-interface UserAttributes {
-    id: number;
-    username: string;
-    password: string;
-}
 
-class User extends Model<UserAttributes> {}
 
-User.init({
+class Account extends Model {}
+
+Account.init({
 
         id: {
             autoIncrement: true,
@@ -35,5 +31,5 @@ User.init({
     });
 
 
-export = User;
+export = Account;
 

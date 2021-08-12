@@ -1,4 +1,4 @@
-import User = require('./user');
+import Account = require('./account');
 import BlogEntry = require('./blogentry');
 import Comment = require('./comment');
-export { User, BlogEntry, Comment };
+export { Account, BlogEntry, Comment };

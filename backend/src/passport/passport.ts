@@ -1,11 +1,11 @@
 import bCrypt from 'bcrypt-nodejs';
 import socketManager from '../util/SocketManager';
-import User from '../models/user';
+import Account from '../models/account';
 import {Request} from "express";
 
 
 // @ts-ignore
-function setupPassport(passport:any, user:User) {
+function setupPassport(passport:any, user:Account) {
     const User = user;
     const LocalStrategy = require('passport-local').Strategy;
 
@@ -28,7 +28,7 @@ function setupPassport(passport:any, user:User) {
                 where: {
                     username: username
                 }
-            }).then(function (user:User) {
+            }).then(function (user:Account) {
                 if (user) {
                     return done(null, false, {
                         message: 'That username is already taken'
@@ -42,13 +42,13 @@ function setupPassport(passport:any, user:User) {
                         };
 
                     // @ts-ignore
-                    User.create(data).then(function (newUser:User) {
+                    User.create(data).then(function (newUser:Account) {
                         // @ts-ignore
                         User.findOne({
                             where: {
                                 username: username
                             }
-                        }).then(function (user:User) {
+                        }).then(function (user:Account) {
                             // @ts-ignore
                             let message = {type: "create", objectType: "User", data: user, user: user.id}
                             socketManager.sendMessage(message);
@@ -87,7 +87,7 @@ function setupPassport(passport:any, user:User) {
                 where: {
                     username: username
                 }
-            }).then(function(user:User) {
+            }).then(function(user:Account) {
                 if (!user) {
                     return done(null, false, {
                         message: 'Username and/or password is incorrect'
@@ -110,7 +110,7 @@ function setupPassport(passport:any, user:User) {
     ));
 
     //serialize
-    passport.serializeUser(function(user:User, done:any) {
+    passport.serializeUser(function(user:Account, done:any) {
         // @ts-ignore
         done(null, user.id);
     });
@@ -119,7 +119,7 @@ function setupPassport(passport:any, user:User) {
     // deserialize user
     passport.deserializeUser(function(id:number, done:any) {
         // @ts-ignore
-        User.findByPk(id).then(function(user:User) {
+        User.findByPk(id).then(function(user:Account) {
             if (user) {
                 done(null, user.get());
             } else {

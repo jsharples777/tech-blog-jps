@@ -4,39 +4,27 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 const sequelize_1 = require("sequelize");
 const connection_1 = __importDefault(require("../db/connection"));
-const account_1 = __importDefault(require("./account"));
-class BlogEntry extends sequelize_1.Model {
+class Account extends sequelize_1.Model {
 }
-BlogEntry.init({
+Account.init({
     id: {
         autoIncrement: true,
         primaryKey: true,
         type: sequelize_1.DataTypes.INTEGER
     },
-    title: {
+    username: {
+        type: sequelize_1.DataTypes.TEXT
+    },
+    password: {
         type: sequelize_1.DataTypes.STRING,
         allowNull: false
     },
-    content: {
-        type: sequelize_1.DataTypes.STRING
-    },
-    createdBy: {
-        type: sequelize_1.DataTypes.INTEGER,
-        references: {
-            model: account_1.default,
-            key: "id"
-        }
-    },
-    changedOn: {
-        type: sequelize_1.DataTypes.BIGINT,
-        allowNull: false
-    }
 }, {
     sequelize: connection_1.default,
     timestamps: false,
     freezeTableName: true,
     underscored: true,
-    modelName: 'blogentry',
+    modelName: 'user',
 });
-module.exports = BlogEntry;
-//# sourceMappingURL=blogentry.js.map
+module.exports = Account;
+//# sourceMappingURL=account.js.map

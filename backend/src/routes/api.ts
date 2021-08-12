@@ -1,6 +1,6 @@
 import express from 'express';
 import debug from 'debug';
-import {User,BlogEntry,Comment} from '../models/index';
+import {Account,BlogEntry,Comment} from '../models/index';
 import moment from 'moment';
 import socketManager from '../util/SocketManager';
 import DataMessage from "../util/DataMessage";
@@ -91,7 +91,7 @@ router.get('/blog', (req,res) => {
     rDebug('Getting all blog entries, their creators and any comments');
 
     BlogEntry.findAll({
-        include: [User, Comment],
+        include: [Account, Comment],
         order: ['id','changedOn']
     })
         .then((blog) => {
@@ -115,7 +115,7 @@ router.post('/blog', (req,res) => {
             // @ts-ignore
             rDebug(`Created new blog entry with id ${blog.id} need full object now`);
             // @ts-ignore
-            BlogEntry.findOne({include: [User, Comment], where: {id: blog.id}
+            BlogEntry.findOne({include: [Account, Comment], where: {id: blog.id}
             })
             .then((blog) => {
                 // @ts-ignore
@@ -148,7 +148,7 @@ router.put('/blog/:id', (req,res) => {
             // @ts-ignore
             rDebug(`Updated new blog entry with id ${blog.id} need full object now`);
             BlogEntry.findOne({
-                include: [User, Comment],
+                include: [Account, Comment],
                 where: {
                     id: req.params.id
                 }
@@ -192,7 +192,7 @@ router.delete('/blog/:id', (req,res) => {
 */
 router.get('/users', (req,res) => {
     rDebug('Getting all user entries');
-    User.findAll({attributes: ['id','username']})
+    Account.findAll({attributes: ['id','username']})
         .then((users) => {
             // be sure to include its associated Products
             res.json(users);

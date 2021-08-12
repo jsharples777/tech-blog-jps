@@ -2,18 +2,15 @@
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var fs_1 = __importDefault(require("fs"));
-var Logger = /** @class */ (function () {
-    function Logger() {
-    }
-    Logger.getLogFile = function () {
+const fs_1 = __importDefault(require("fs"));
+class Logger {
+    static getLogFile() {
         if (Logger.logFile === null) {
             Logger.logFile = fs_1.default.createWriteStream(__dirname + '/../log/server.log', { flags: 'w' });
         }
         return Logger.logFile;
-    };
-    Logger.log = function (message, debugDepth) {
-        if (debugDepth === void 0) { debugDepth = 5; }
+    }
+    static log(message, debugDepth = 5) {
         if ((message === null) || (message === undefined))
             return;
         if (!this.debugOn)
@@ -24,20 +21,19 @@ var Logger = /** @class */ (function () {
             console.log(message);
             Logger.getLogFile().write(new Date().toString() + ":" + message + '\n');
         }
-    };
-    Logger.setLevel = function (newLevel) {
+    }
+    static setLevel(newLevel) {
         Logger.debugDepth = newLevel;
-    };
-    Logger.setOn = function () {
+    }
+    static setOn() {
         Logger.debugOn = true;
-    };
-    Logger.setOff = function () {
+    }
+    static setOff() {
         Logger.debugOn = false;
-    };
-    Logger.debugOn = true;
-    Logger.debugDepth = 1000;
-    return Logger;
-}());
-module.exports = { Logger: Logger };
+    }
+}
+Logger.debugOn = true;
+Logger.debugDepth = 1000;
+module.exports = { Logger };
 module.exports = Logger;
 //# sourceMappingURL=Logger.js.map

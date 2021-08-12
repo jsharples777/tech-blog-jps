@@ -11,5 +11,5 @@ function forwardAuthenticated(req, res, next) {
     }
     res.redirect('/');
 }
-module.exports = { ensureAuthenticated: ensureAuthenticated, forwardAuthenticated: forwardAuthenticated };
+module.exports = { ensureAuthenticated, forwardAuthenticated };
 //# sourceMappingURL=auth.js.map

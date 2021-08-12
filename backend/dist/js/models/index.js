@@ -1,14 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Comment = exports.BlogEntry = exports.User = void 0;
-var User = require("./user");
-exports.User = User;
-var BlogEntry = require("./blogentry");
+exports.Comment = exports.BlogEntry = exports.Account = void 0;
+const Account = require("./account");
+exports.Account = Account;
+const BlogEntry = require("./blogentry");
 exports.BlogEntry = BlogEntry;
-var Comment = require("./comment");
+const Comment = require("./comment");
 exports.Comment = Comment;
-User.hasMany(BlogEntry, { foreignKey: 'createdBy' });
-User.hasMany(Comment, { foreignKey: 'createdBy' });
+Account.hasMany(BlogEntry, { foreignKey: 'createdBy' });
+Account.hasMany(Comment, { foreignKey: 'createdBy' });
 BlogEntry.hasMany(Comment, { foreignKey: 'commentOn', onDelete: 'cascade' });
-BlogEntry.belongsTo(User, { foreignKey: 'createdBy' });
+BlogEntry.belongsTo(Account, { foreignKey: 'createdBy' });
 //# sourceMappingURL=index.js.map

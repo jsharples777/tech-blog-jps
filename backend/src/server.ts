@@ -3,9 +3,6 @@ import dotenv from'dotenv';
 import morgan from 'morgan';
 import debug from 'debug';
 
-dotenv.config();
-const socketserverDebug = debug('socket');
-const serverDebug = debug('server');
 
 // HTTP handlers
 import http from 'http';
@@ -22,9 +19,22 @@ import connectFlash from 'connect-flash';
 // Sockets
 import socketManager from './util/SocketManager';
 
-
 // Authentication middleware
 import passport from 'passport';
+
+//Passport and User model
+import setupPassport from './passport/passport';
+import sequelize from './db/connection';
+import {Account} from './models';
+
+// routes
+import routes from './routes';
+import apiRoutes from './routes/api';
+
+dotenv.config();
+console.log(process.env);
+
+const serverDebug = debug('server');
 
 const isDevelopment = (process.env.MODE === 'Development');
 serverDebug(`Is development mode ${isDevelopment}`);
@@ -48,9 +58,6 @@ app.set('view cache', !isDevelopment); // view caching in production
 serverDebug('Installing middlewares');
 
 serverDebug('Sequelizing database');
-// load models
-import sequelize from './db/connection';
-import {User,BlogEntry,Comment} from './models';
 //Sync Database
 sequelize.sync().then(function () {
     serverDebug('Database sync successful');
@@ -99,19 +106,13 @@ if (isDevelopment) {
 // ensure the user is logged in with a path
 
 serverDebug('Installing routes');
-import routes from './routes';
-// add the middleware path routing
-app.use('/', routes); // add the routes to the express middleware
-// add the api path routing
-import apiRoutes from './routes/api';
-app.use('/api',apiRoutes);
+app.use('/', routes);// add the middleware path routing
+app.use('/api',apiRoutes);// add the api path routing
 
 // Setup authentication
 serverDebug('Setting up User model and authentication with Passport');
-//load passport strategies
-import setupPassport from './passport/passport';
 // @ts-ignore
-setupPassport(passport, User);
+setupPassport(passport, Account);
 
 // route for the env.js file being served to the client
 serverDebug('Setting the environment variables for the browser to access');

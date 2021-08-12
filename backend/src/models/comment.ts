@@ -1,6 +1,6 @@
 import { Model, DataTypes }  from 'sequelize';
 import sequelize from '../db/connection';
-import User from './user';
+import Account from './account';
 import BlogEntry from "./blogentry";
 
 class Comment extends Model {}
@@ -18,7 +18,7 @@ Comment.init({
         createdBy: {
             type: DataTypes.INTEGER,
             references: {
-                model: User,
+                model: Account,
                 key: "id"
             }
         },

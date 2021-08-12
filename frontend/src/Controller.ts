@@ -102,11 +102,11 @@ class Controller implements SocketListener, StateChangeListener {
             User:null,
             Comments:[],
         }
-        const cbUser:User|null = jsonEntry.User;
+        const cbUser:User|null = jsonEntry.user;
         if (cbUser) {
             entry.User = Controller.convertJSONUserToUser(cbUser);
         }
-        const cbComments:Comment[]|null = jsonEntry.Comments;
+        const cbComments:Comment[]|null = jsonEntry.comments;
         if (cbComments) {
             cbComments.forEach((cbComment:any) => {
                 let comment = Controller.convertJSONCommentToComment(cbComment);
@@ -513,6 +513,7 @@ class Controller implements SocketListener, StateChangeListener {
                                         this.applicationView.hideAllSideBars();
                                     }
                                 }
+                                notifier.show(deletedEntry.title, `${deletedEntry.User.username} has deleted this entry.`, 'danger');
                             }
 
                             break;

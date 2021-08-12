@@ -1,11 +1,11 @@
-import User = require('./user');
+import Account = require('./account');
 import BlogEntry = require('./blogentry');
 import Comment = require('./comment');
 
-User.hasMany(BlogEntry,{foreignKey: 'createdBy'});
-User.hasMany(Comment,{foreignKey: 'createdBy'});
+Account.hasMany(BlogEntry,{foreignKey: 'createdBy'});
+Account.hasMany(Comment,{foreignKey: 'createdBy'});
 BlogEntry.hasMany(Comment, {foreignKey: 'commentOn', onDelete:'cascade'});
 
-BlogEntry.belongsTo(User,{foreignKey: 'createdBy'})
+BlogEntry.belongsTo(Account,{foreignKey: 'createdBy'})
 
-export {User,BlogEntry,Comment};
+export {Account,BlogEntry,Comment};

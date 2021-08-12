@@ -1,11 +1,11 @@
 import express from 'express';
 import passport from 'passport';
-import User from '../models/user';
+import Account from '../models/account';
 import debug from 'debug';
 import setupPassport from '../passport/passport';
 
 // @ts-ignore
-setupPassport(passport,User);
+setupPassport(passport,Account);
 
 const rDebug = debug('route');
 

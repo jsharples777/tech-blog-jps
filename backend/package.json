@@ -9,9 +9,9 @@
     "build": "webpack --mode production",
     "wpcompile": "webpack --mode development",
     "wpwatch": "webpack --mode development --watch",
-    "start": "nodemon -e js,json,graphql,env -w . -w .env  -w dist -w server.js dist/js/server.js",
-    "server": "nodemon -e js,json,env -w . -w .env  -w dist -w server.js dist/server.bundle.js",
-    "tsserver": "nodemon",
+    "startdist": "nodemon -e js,json,graphql,env -w . -w .env  -w dist -w server.js dist/js/server.js",
+    "startbundle": "nodemon -e js,json,env -w . -w .env  -w dist -w server.js dist/server.bundle.js",
+    "start": "nodemon",
     "lint": "eslint --ignore-pattern dist --fix ."
   },
   "dependencies": {

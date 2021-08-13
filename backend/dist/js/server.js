@@ -1,131 +1,113 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
 // Configuration and Logging handlers
 /* eslint-disable import/first */
 require('dotenv').config();
-import morgan from 'morgan';
-import debug from 'debug';
-
+const morgan_1 = __importDefault(require("morgan"));
+const debug_1 = __importDefault(require("debug"));
 // HTTP handlers
-import http from 'http';
-import path from 'path';
-
+const http_1 = __importDefault(require("http"));
+const path_1 = __importDefault(require("path"));
 // Express framework and additional middleware
-import express from 'express';
-import expressHandlebars from 'express-handlebars';
-import bodyParser from 'body-parser';
-import session from 'express-session';
-import cookieParser from 'cookie-parser';
-import connectFlash from 'connect-flash';
-
+const express_1 = __importDefault(require("express"));
+const express_handlebars_1 = __importDefault(require("express-handlebars"));
+const body_parser_1 = __importDefault(require("body-parser"));
+const express_session_1 = __importDefault(require("express-session"));
+const cookie_parser_1 = __importDefault(require("cookie-parser"));
+const connect_flash_1 = __importDefault(require("connect-flash"));
 // Sockets
-import socketManager from './util/SocketManager';
-
+const SocketManager_1 = __importDefault(require("./util/SocketManager"));
 // Authentication middleware
-import passport from 'passport';
-
+const passport_1 = __importDefault(require("passport"));
 //Passport and User model
-import setupPassport from './passport/passport';
-import sequelize from './db/connection';
-import {Account} from './models';
-
+const passport_2 = __importDefault(require("./passport/passport"));
+const connection_1 = __importDefault(require("./db/connection"));
+const models_1 = require("./models");
 // routes
-import routes from './routes';
-import apiRoutes from './routes/api';
-
-const serverDebug = debug('server');
-
+const routes_1 = __importDefault(require("./routes"));
+const api_1 = __importDefault(require("./routes/api"));
+const serverDebug = debug_1.default('server');
 const isDevelopment = (process.env.MODE === 'Development');
 serverDebug(`Is development mode ${isDevelopment}`);
-
 // Create and configure the express app
-const app = express();
-
+const app = express_1.default();
 // Express view/template engine setup
 serverDebug('setting up templating engine');
-let relPath = (isDevelopment)?process.env.VIEW_RELATIVE_PATH_DEV:process.env.VIEW_RELATIVE_PATH;
+let relPath = (isDevelopment) ? process.env.VIEW_RELATIVE_PATH_DEV : process.env.VIEW_RELATIVE_PATH;
 serverDebug(`Base directory is: ${__dirname}`);
 serverDebug(`Relative path is: ${relPath}`);
 serverDebug(`${__dirname}${relPath}views`);
 app.set('views', `${__dirname}${relPath}views`);
-app.engine('handlebars', expressHandlebars({
+app.engine('handlebars', express_handlebars_1.default({
     defaultLayout: 'default',
-    partialsDir: path.join(app.get('views'), 'partials'),
-    layoutsDir: path.join(app.get('views'), 'layouts'),
+    partialsDir: path_1.default.join(app.get('views'), 'partials'),
+    layoutsDir: path_1.default.join(app.get('views'), 'layouts'),
 }));
-
 serverDebug('setting up templating engine - handlebars');
 app.set('view engine', 'handlebars');
 app.set('view cache', !isDevelopment); // view caching in production
-
 serverDebug('Installing middlewares');
-
 serverDebug('Sequelizing database');
 //Sync Database
-sequelize.sync().then(function () {
+connection_1.default.sync().then(function () {
     serverDebug('Database sync successful');
 }).catch(function (err) {
     serverDebug(err, "Something went wrong with the Database Update!");
 });
-
 // Express middlewares
-app.use('/', express.static('./public')); // root directory of static content
-app.use('/dist', express.static('./dist')); // root directory of static content
-app.use(cookieParser()); // add cookie support
-app.use(bodyParser.json()); // add POST JSON support
-app.use(bodyParser.urlencoded({extended: true})); // and POST URL Encoded form support
-
-
-app.use(session({
+app.use('/', express_1.default.static('./public')); // root directory of static content
+app.use('/dist', express_1.default.static('./dist')); // root directory of static content
+app.use(cookie_parser_1.default()); // add cookie support
+app.use(body_parser_1.default.json()); // add POST JSON support
+app.use(body_parser_1.default.urlencoded({ extended: true })); // and POST URL Encoded form support
+app.use(express_session_1.default({
     secret: 'frankie',
     resave: true,
-    saveUninitialized:false,
+    saveUninitialized: false,
     cookie: {
-        maxAge: 30*60*1000,
+        maxAge: 30 * 60 * 1000,
     },
     proxy: true,
 }));
-
-
-app.use(connectFlash()); // flash messages
-app.use(passport.initialize()); // initialise the authentication
-app.use(passport.session()); // setup authentication to use cookie/sessions
-
-
+app.use(connect_flash_1.default()); // flash messages
+app.use(passport_1.default.initialize()); // initialise the authentication
+app.use(passport_1.default.session()); // setup authentication to use cookie/sessions
 /* Are we in Development or in Production? */
 serverDebug('Setting up server side logging with Morgan');
 if (isDevelopment) {
-    app.use(morgan('dev')); /* log server calls with performance timing with development details */
-
+    app.use(morgan_1.default('dev')); /* log server calls with performance timing with development details */
     /* log call requests with body */
     app.use((request, response, next) => {
         serverDebug(`Received request for ${request.url} with/without body`);
-        if (request.body) console.log(request.body);
+        if (request.body)
+            console.log(request.body);
         next();
     });
-} else {
-    app.use(morgan('combined')); /* log server calls per standard combined Apache combined format */
 }
-
+else {
+    app.use(morgan_1.default('combined')); /* log server calls per standard combined Apache combined format */
+}
 // ensure the user is logged in with a path
-
 serverDebug('Installing routes');
-app.use('/', routes);// add the middleware path routing
-app.use('/api',apiRoutes);// add the api path routing
-
+app.use('/', routes_1.default); // add the middleware path routing
+app.use('/api', api_1.default); // add the api path routing
 // Setup authentication
 serverDebug('Setting up User model and authentication with Passport');
 // @ts-ignore
-setupPassport(passport, Account);
-
+passport_2.default(passport_1.default, models_1.Account);
 // route for the env.js file being served to the client
 serverDebug('Setting the environment variables for the browser to access');
 const port = process.env.PORT || 3000;
 const LOCAL_HOST_API_DEVELOPMENT = `http://localhost:${port}/api`;
 const LOCAL_HOST_API_PRODUCTION = `https://localhost:${port}/api`;
 let localhostAPIURL = LOCAL_HOST_API_DEVELOPMENT;
-if (!isDevelopment) localhostAPIURL = LOCAL_HOST_API_PRODUCTION;
+if (!isDevelopment)
+    localhostAPIURL = LOCAL_HOST_API_PRODUCTION;
 const API_SERVER_URL = process.env.API_SERVER_URL || localhostAPIURL;
-let env:any = {serverURL: API_SERVER_URL};
-
+let env = { serverURL: API_SERVER_URL };
 app.get('/js/env.js', (req, res) => {
     let session = req.session;
     if (session.id) {
@@ -133,8 +115,6 @@ app.get('/js/env.js', (req, res) => {
     }
     res.send(`window.ENV = ${JSON.stringify(env)}`);
 });
-
-
 // catch 404 and forward to error handler
 serverDebug('Setting up 404 handler');
 app.use((req, res, next) => {
@@ -144,7 +124,6 @@ app.use((req, res, next) => {
     err.status = 404;
     next(err);
 });
-
 // error handler
 if (isDevelopment) {
     serverDebug('Setting up DEV 500 handler');
@@ -157,7 +136,8 @@ if (isDevelopment) {
             error: err,
         });
     });
-} else {
+}
+else {
     serverDebug('Production 500 handler');
     // @ts-ignore
     app.use((err, req, res, next) => {
@@ -169,16 +149,12 @@ if (isDevelopment) {
         });
     });
 }
-
-const httpServer = new http.Server(app);
+const httpServer = new http_1.default.Server(app);
 // setup the sockets manager with the server
-socketManager.connectToServer(httpServer);
-
-
-
+SocketManager_1.default.connectToServer(httpServer);
 httpServer.listen(port, () => {
     serverDebug(`Server started on port ${port}`);
     // start listening for socket events
-    socketManager.listen();
+    SocketManager_1.default.listen();
 });
-
+//# sourceMappingURL=server.js.map

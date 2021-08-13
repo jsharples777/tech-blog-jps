@@ -4,15 +4,16 @@
   "description": "Template for back-end with Webpack",
   "main": "./dist/server.js",
   "scripts": {
-    "compile": "tsc",
-    "watch": "tsc-watch",
-    "build": "webpack --mode production",
-    "wpcompile": "webpack --mode development",
-    "wpwatch": "webpack --mode development --watch",
-    "startdist": "nodemon -e js,json,graphql,env -w . -w .env  -w dist -w server.js dist/js/server.js",
-    "startbundle": "nodemon -e js,json,env -w . -w .env  -w dist -w server.js dist/server.bundle.js",
-    "start": "nodemon",
-    "lint": "eslint --ignore-pattern dist --fix ."
+    "compile.dev": "tsc-watch",
+    "start.dev": "nodemon  -w src  -e ts,tsx,json,env --exec 'ts-node ./src/server.ts'",
+    "build.dev": "webpack --mode development",
+    "build.prod": "webpack --mode production",
+    "start.bundle": "nodemon -e js,json,env -w . -w .env  -w dist dist/js/server.bundle.js",
+    "start": "nodemon -e js,json,env -w . -w .env  -w dist dist/js/server.js",
+    "tsc": "tsc",
+    "lint": "eslint --ignore-pattern src --fix .",
+    "watch.dev_old": "webpack --mode development --watch",
+    "start.dev_old": "nodemon -e js,json,graphql,env -w . -w .env  -w dist -w server.js dist/js/server.js"
   },
   "dependencies": {
     "bcrypt": "^5.0.1",

@@ -8,11 +8,11 @@ module.exports = {
   },
   output: {
     filename: '[name].bundle.js',
-    path: path.resolve(__dirname, './dist/'),
+    path: path.resolve(__dirname, './dist/js/'),
   },
   resolve: {
-    extensions: ['.tsx','.ts','.jsx','.js'],
-    fallback: {"url":false},
+    extensions: ['.tsx', '.ts', '.jsx', '.js'],
+    fallback: { url: false },
   },
   module: {
     rules: [
@@ -24,7 +24,7 @@ module.exports = {
     ],
 
   },
-  devtool: "source-map",
+  //devtool: 'source-map',
   externalsPresets: { node: true }, // in order to ignore built-in modules like path, fs, etc.
   externals: [nodeExternals()],
 

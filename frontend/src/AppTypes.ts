@@ -1,7 +1,7 @@
 
 
 export type Comment = {
-    id:number,
+    id:number|null,
     content:string,
     createdBy: number,
     changedOn: number,
@@ -14,7 +14,7 @@ export type User = {
 }
 
 export type BlogEntry = {
-    id:number,
+    id:number|null,
     title: string,
     content:string,
     createdBy:number,

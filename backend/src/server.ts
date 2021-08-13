@@ -66,6 +66,24 @@ sequelize.sync().then(function () {
     serverDebug(err, "Something went wrong with the Database Update!");
 });
 
+if (isDevelopment) {
+  /* eslint "global_require":"off" */
+  /* eslint "import/no-extraneous-dependencies":"off" */
+  serverDebug("Installing HMR middleware");
+  const webpack = require('webpack');
+  const devMiddleware = require('webpack-dev-middleware');
+  const hotMiddleware = require('webpack-hot-middleware');
+
+  const config = require('../../frontend/webpack.config.server.js');
+  config.entry.app.push('webpack-hot-middleware/client');
+  config.plugins = config.plugin || [];
+  config.plugins.push(new webpack.HotModuleReplacementPlugin());
+
+  const compiler = webpack(config);
+  app.use(devMiddleware(compiler));
+  app.use(hotMiddleware(compiler));
+}
+
 // Express middlewares
 app.use('/', express.static('./public')); // root directory of static content
 app.use('/dist', express.static('./dist')); // root directory of static content

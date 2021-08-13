@@ -7,16 +7,33 @@ import moment from 'moment';
 
 import controller from './Controller';
 import CommentSidebarView from "./component/CommentSidebarView";
-import BlogEntry from "./component/BlogEntryView";
+import BlogEntryView from "./component/BlogEntryView";
 import stateManager from "./state/StateManagementUtil";
 import {isSame} from "./util/EqualityFunctions";
 import DetailsSidebarView from "./component/DetailsSidebarView";
+
+import {BlogEntry, Comment} from './AppTypes';
 
 
 const logger = debug('app');
 
 class Root extends React.Component{
+    private titleEl: any;
+    private contentEl: any;
+    private modalEl: any;
+    // @ts-ignore
+    private commentView: CommentSidebarView;
+    // @ts-ignore
+    private detailsView: DetailsSidebarView;
+    // @ts-ignore
+    private cancelBtnEl: HTMLElement | null;
+    // @ts-ignore
+    private confirmBtnEl: HTMLElement | null;
+    // @ts-ignore
+    private closeBtnEl: HTMLElement | null;
+
     constructor() {
+        // @ts-ignore
         super();
         this.state = {
             isLoggedIn: false,
@@ -132,33 +149,39 @@ class Root extends React.Component{
         this.handleDeleteEntry = this.handleDeleteEntry.bind(this);
         this.handleDeleteComment = this.handleDeleteComment.bind(this);
 
-        this.controller = controller.connectToApplication(this, window.localStorage);
+        controller.connectToApplication(this, window.localStorage);
     }
 
     getCurrentUser() {
         return controller.getLoggedInUserId();
     }
 
-    alert(title,content) {
+    alert(title:string,content:string) {
         this.titleEl.textContent = title;
         this.contentEl.textContent = content;
+        // @ts-ignore
         this.modalEl.classList.remove(this.state.ui.alert.hideClass);
+        // @ts-ignore
         this.modalEl.classList.add(this.state.ui.alert.showClass);
     }
 
     render() {
         logger("Rendering App");
+        // @ts-ignore
         logger(this.state.entries);
+        // @ts-ignore
         logger(this.state.applyUserFilter);
 
+        // @ts-ignore
         let entriesToDisplay = this.state.entries;
+        // @ts-ignore
         if (this.state.applyUserFilter && controller.isLoggedIn() && (controller.getLoggedInUserId() > 0)) {
-            entriesToDisplay = entriesToDisplay.filter((entry) => {
+            entriesToDisplay = entriesToDisplay.filter((entry:BlogEntry) => {
                 return (entry.createdBy === controller.getLoggedInUserId());
             });
         }
-        const blog = entriesToDisplay.map((entry, index) =>
-            <BlogEntry
+        const blog = entriesToDisplay.map((entry:BlogEntry, index:number) =>
+            <BlogEntryView
                 key={index}
                 entry={entry}
                 showCommentsHandler={this.handleSelectEntryComments}
@@ -174,24 +197,31 @@ class Root extends React.Component{
     }
 
     cancelDelete(event:Event) {
+        // @ts-ignore
         this.modalEl.classList.remove(this.state.ui.alert.showClass);
+        // @ts-ignore
         this.modalEl.classList.add(this.state.ui.alert.hideClass);
         event.preventDefault();
     }
 
     confirmDelete(event:Event) {
+        // @ts-ignore
         this.modalEl.classList.remove(this.state.ui.alert.showClass);
+        // @ts-ignore
         this.modalEl.classList.add(this.state.ui.alert.hideClass);
         event.preventDefault();
+        // @ts-ignore
         let entryId = this.modalEl.getAttribute(this.state.controller.events.entry.eventDataKeyId);
         logger(`Handling Delete Entry ${entryId}`);
         if (entryId) {
             // find the entry from the state manager
             entryId = parseInt(entryId);
+            // @ts-ignore
             const entry = stateManager.findItemInState(this.state.stateNames.entries,{id:entryId},isSame);
             if (entry) {
                 // delete the entry using the controller and remove the state manager
                 controller.deleteEntry(entry);
+                // @ts-ignore
                 stateManager.removeItemFromState(this.state.stateNames.entries,entry,isSame);
             }
         }
@@ -208,24 +238,34 @@ class Root extends React.Component{
         this.detailsView.onDocumentLoaded();
 
         // navigation item handlers
-        document.getElementById(this.state.ui.navigation.addNewEntryId).addEventListener('click', this.handleAddEntry);
-        document.getElementById(this.state.ui.navigation.showMyEntriesId).addEventListener('click', this.handleShowMyEntries);
+        if (document) {
+            // @ts-ignore
+            document.getElementById(this.state.ui.navigation.addNewEntryId).addEventListener('click', this.handleAddEntry);
+            // @ts-ignore
+            document.getElementById(this.state.ui.navigation.showMyEntriesId).addEventListener('click', this.handleShowMyEntries);
+        }
 
         // alert modal dialog setup
+        // @ts-ignore
         this.modalEl = document.getElementById(this.state.ui.alert.modalId);
+        // @ts-ignore
         this.titleEl = document.getElementById(this.state.ui.alert.titleId);
+        // @ts-ignore
         this.contentEl = document.getElementById(this.state.ui.alert.contentId);
+        // @ts-ignore
         this.cancelBtnEl = document.getElementById(this.state.ui.alert.cancelButtonId);
+        // @ts-ignore
         this.confirmBtnEl = document.getElementById(this.state.ui.alert.confirmButtonId);
+        // @ts-ignore
         this.closeBtnEl = document.getElementById(this.state.ui.alert.closeButtonId);
 
         // event listeners for the confirm delete of entry
-        this.cancelBtnEl.addEventListener('click',this.cancelDelete);
-        this.confirmBtnEl.addEventListener('click',this.confirmDelete);
-        this.closeBtnEl.addEventListener('click',this.cancelDelete);
+        if (this.cancelBtnEl) this.cancelBtnEl.addEventListener('click',this.cancelDelete);
+        if (this.confirmBtnEl) this.confirmBtnEl.addEventListener('click',this.confirmDelete);
+        if (this.closeBtnEl) this.closeBtnEl.addEventListener('click',this.cancelDelete);
 
         // ok lets try get things done
-        this.controller.initialise();
+        controller.initialise();
     }
 
     hideAllSideBars() {
@@ -237,6 +277,7 @@ class Root extends React.Component{
         logger('Handling Show My Entries');
         this.hideAllSideBars();
         if (!controller.isLoggedIn()) {
+            // @ts-ignore
             window.location.href = this.state.apis.login;
             return;
         }
@@ -255,10 +296,12 @@ class Root extends React.Component{
         this.hideAllSideBars();
         // prevent anything from happening if we are not logged in
         if (!controller.isLoggedIn()) {
+            // @ts-ignore
             window.location.href = this.state.apis.login;
             return;
         }
         // find the current user
+        // @ts-ignore
         let creator = stateManager.findItemInState(this.state.stateNames.users,
             {id: controller.getLoggedInUserId()},
              isSame);
@@ -277,6 +320,7 @@ class Root extends React.Component{
         }
         logger(entry);
         this.setState({selectedEntry:entry});
+        // @ts-ignore
         stateManager.setStateByName(this.state.stateNames.selectedEntry,entry);
         this.detailsView.eventShow(event);
     }
@@ -285,24 +329,29 @@ class Root extends React.Component{
         logger('Handling Add Comment');
         event.preventDefault();
         // get the comment element
-        let commentEl = document.getElementById(this.state.ui.commentSideBar.dom.commentId);
-        if (commentEl.value.trim().length === 0) return;
+        // @ts-ignore
+        let commentEl:HTMLInputElement = document.getElementById(this.state.ui.commentSideBar.dom.commentId);
+        if (commentEl && commentEl.value.trim().length === 0) return;
 
         // prevent anything from happening if we are not logged in
         if (!controller.isLoggedIn()) {
+            // @ts-ignore
             window.location.href = this.state.apis.login;
             return;
         }
         // find the current user
+        // @ts-ignore
         let creator = stateManager.findItemInState(this.state.stateNames.users,
             {id: controller.getLoggedInUserId()},
             isSame);
         logger(creator);
         // find the selected entry
+        // @ts-ignore
         let entry = stateManager.getStateByName(this.state.stateNames.selectedEntry);
         if (entry && commentEl) {
             // create an empty comment
-            let comment = {
+            // @ts-ignore
+            let comment:Comment = {
                 createdBy: creator.id,
                 commentOn: entry.id,
                 changedOn: parseInt(moment().format('YYYYMMDDHHmmss')),
@@ -314,70 +363,76 @@ class Root extends React.Component{
         }
     }
 
-    handleSelectEntryComments(event) {
+    handleSelectEntryComments(event:MouseEvent) {
         logger('Handling Select Entry Comments');
         event.preventDefault();
         this.hideAllSideBars();
+        // @ts-ignore
         let entryId = event.target.getAttribute(this.state.controller.events.entry.eventDataKeyId);
         logger(`Handling Show Edit Entry ${entryId}`);
         if (entryId) {
             // find the entry from the state manager
             entryId = parseInt(entryId);
+            // @ts-ignore
             const entry = stateManager.findItemInState(this.state.stateNames.entries,{id:entryId},isSame);
             logger(entry);
             if (entry) {
                 // select the entry and open the details sidebar
                 this.setState({selectedEntry:entry});
+                // @ts-ignore
                 stateManager.setStateByName(this.state.stateNames.selectedEntry,entry);
                 this.commentView.eventShow(event);
             }
         }
     }
 
-    handleShowEditEntry(event) {
+    handleShowEditEntry(event:Event) {
         event.preventDefault();
         this.hideAllSideBars();
+        // @ts-ignore
         let entryId = event.target.getAttribute(this.state.controller.events.entry.eventDataKeyId);
         logger(`Handling Show Edit Entry ${entryId}`);
         if (entryId) {
             // find the entry from the state manager
             entryId = parseInt(entryId);
+            // @ts-ignore
             const entry = stateManager.findItemInState(this.state.stateNames.entries,{id:entryId},isSame);
             logger(entry);
             if (entry) {
                 // select the entry and open the details sidebar
                 this.setState({selectedEntry:entry});
+                // @ts-ignore
                 stateManager.setStateByName(this.state.stateNames.selectedEntry,entry);
                 this.detailsView.eventShow(event);
             }
         }
     }
 
-    handleDeleteEntry(event) {
+    handleDeleteEntry(event:Event) {
         event.preventDefault();
         this.hideAllSideBars();
+        // @ts-ignore
         let entryId = event.target.getAttribute(this.state.controller.events.entry.eventDataKeyId);
         logger(`Handling Delete Entry ${entryId}`);
         if (entryId) {
+            // @ts-ignore
             this.modalEl.setAttribute(this.state.controller.events.entry.eventDataKeyId,entryId);
             // find the entry from the state manager
             entryId = parseInt(entryId);
+            // @ts-ignore
             const entry = stateManager.findItemInState(this.state.stateNames.entries,{id:entryId},isSame);
             this.alert(entry.title,"Are you sure you want to delete this blog entry?")
         }
     }
 
-    handleDeleteComment(id) {
+    handleDeleteComment(id:number):void {
         controller.deleteComment(id);
     }
 
-    handleUpdateEntry(entry) {
+    // @ts-ignore
+    handleUpdateEntry(entry:BlogEntry) {
         this.hideAllSideBars();
         controller.updateEntry(entry);
-    }
-
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        logger('component Did Update');
     }
 }
 
@@ -385,6 +440,7 @@ class Root extends React.Component{
 localStorage.debug = 'app view-ts controller-ts socket-ts api-ts state-manager-ts';
 debug.log = console.info.bind(console);
 
+// @ts-ignore
 const element = <Root className="container-fluid justify-content-around"/>;
 
 ReactDOM.render(element, document.getElementById('root'));

@@ -331,7 +331,7 @@ class Controller implements SocketListener, StateChangeListener {
     }
 
     // Lets delete a comment
-    private deleteComment(id:number) {
+    deleteComment(id:number) {
         let entry = stateManager.getStateByName(this.config.stateNames.selectedEntry);
         if (entry) {
             cLogger(`Handling delete comment for ${entry.id} and comment ${id}`);

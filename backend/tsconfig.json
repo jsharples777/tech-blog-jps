@@ -7,7 +7,7 @@
     "strict": true,
     "target": "es6",
     "allowJs": true,
-    "noEmit": false,
+    "noEmit": true,
     "outDir": "./dist/js",
     "esModuleInterop": true,
     "declaration": true,

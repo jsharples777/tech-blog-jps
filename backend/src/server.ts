@@ -44,7 +44,7 @@ const app = express();
 
 // Express view/template engine setup
 serverDebug('setting up templating engine');
-app.set('views', path.join(`${__dirname}/`, 'views'));
+app.set('views', path.join(`${__dirname}/../`, 'views'));
 app.engine('handlebars', expressHandlebars({
     defaultLayout: 'default',
     partialsDir: path.join(app.get('views'), 'partials'),

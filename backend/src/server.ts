@@ -66,7 +66,7 @@ sequelize.sync().then(function () {
     serverDebug(err, "Something went wrong with the Database Update!");
 });
 
-if (isDevelopment) {
+if (isDevelopment  && (process.env.ENABLE_HMR === "true")) {
   /* eslint "global_require":"off" */
   /* eslint "import/no-extraneous-dependencies":"off" */
   serverDebug("Installing HMR middleware");

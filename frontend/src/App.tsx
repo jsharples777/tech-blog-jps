@@ -437,8 +437,8 @@ class Root extends React.Component{
 }
 
 //localStorage.debug = 'app view-ts controller-ts socket-ts api-ts local-storage-ts state-manager-ts view-ts:blogentry view-ts:comments view-ts:details';
-localStorage.debug = 'app view-ts controller-ts socket-ts api-ts state-manager-ts';
-debug.log = console.info.bind(console);
+//localStorage.debug = 'app controller-ts socket-ts';
+// debug.log = console.info.bind(console);
 
 // @ts-ignore
 const element = <Root className="container-fluid justify-content-around"/>;

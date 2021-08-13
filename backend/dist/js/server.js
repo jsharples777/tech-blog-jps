@@ -57,7 +57,7 @@ connection_1.default.sync().then(function () {
 }).catch(function (err) {
     serverDebug(err, "Something went wrong with the Database Update!");
 });
-if (isDevelopment) {
+if (isDevelopment && (process.env.ENABLE_HMR === "true")) {
     /* eslint "global_require":"off" */
     /* eslint "import/no-extraneous-dependencies":"off" */
     serverDebug("Installing HMR middleware");

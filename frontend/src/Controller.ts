@@ -415,8 +415,9 @@ class Controller implements SocketListener, StateChangeListener {
                             // find the entry in question
                             const changedEntry = <BlogEntry|null>stateManager.findItemInState(this.config.stateNames.entries, {id: stateObj.commentOn}, isSame);
                             if (changedEntry) {
+                                let comment:Comment = Controller.convertJSONCommentToComment(stateObj);
                                 // add the new comment
-                                changedEntry.Comments.push(stateObj);
+                                changedEntry.Comments.push(comment);
                                 // update the state
                                 stateManager.updateItemInState(this.config.stateNames.entries, changedEntry, isSame);
                                 // was this entry current open by the user?
@@ -435,8 +436,11 @@ class Controller implements SocketListener, StateChangeListener {
                             break;
                         }
                         case "BlogEntry": {
+                            let entry:BlogEntry = Controller.convertJSONEntryToBlogEntry(stateObj);
+                            cLogger("Converting to BlogEntry type for Create");
+                            cLogger(entry);
                             // add the new item to the state
-                            stateManager.addNewItemToState(this.config.stateNames.entries, stateObj);
+                            stateManager.addNewItemToState(this.config.stateNames.entries, entry);
                             let username = "unknown";
                             if (changeUser) {
                                 username = changeUser.username;
@@ -446,8 +450,9 @@ class Controller implements SocketListener, StateChangeListener {
                             break;
                         }
                         case "User": {
+                            let user:User = Controller.convertJSONUserToUser(stateObj);
                             // add the new item to the state
-                            stateManager.addNewItemToState(this.config.stateNames.users, stateObj);
+                            stateManager.addNewItemToState(this.config.stateNames.users, user);
 
                             notifier.show(stateObj.username, `${stateObj.username} has just registered.`, 'message');
                             break;
@@ -458,8 +463,11 @@ class Controller implements SocketListener, StateChangeListener {
                 case "update": {
                     switch (message.objectType) {
                         case "BlogEntry": {
+                            let entry:BlogEntry = Controller.convertJSONEntryToBlogEntry(stateObj);
+                            cLogger("Converting to BlogEntry type for Update");
+                            cLogger(entry);
                             // update the item in the state
-                            stateManager.updateItemInState(this.config.stateNames.entries, stateObj, isSame);
+                            stateManager.updateItemInState(this.config.stateNames.entries, entry, isSame);
                             // the entry could be selected by this (different user) but that would only be for comments, which is not what changed, so we are done
                             break;
                         }

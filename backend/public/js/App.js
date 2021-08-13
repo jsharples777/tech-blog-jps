@@ -459,7 +459,7 @@ var Root = /*#__PURE__*/function (_React$Component) {
 }(React.Component); //localStorage.debug = 'app view-ts controller-ts socket-ts api-ts local-storage-ts state-manager-ts view-ts:blogentry view-ts:comments view-ts:details';
 
 
-localStorage.debug = 'app view-ts controller-ts socket-ts api-ts state-manager-ts';
+localStorage.debug = 'app controller-ts socket-ts';
 debug.log = console.info.bind(console); // @ts-ignore
 
 var element = /*#__PURE__*/React.createElement(Root, {

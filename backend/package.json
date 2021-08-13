@@ -4,10 +4,10 @@
   "description": "Template for back-end with Webpack",
   "main": "./dist/server.js",
   "scripts": {
-    "compile.dev": "tsc-watch",
+    "compile": "tsc-watch",
     "start.dev": "nodemon  -w src  -e ts,tsx,json,env -w . -w .env --exec 'ts-node ./src/server.ts'",
     "build.dev": "webpack --mode development",
-    "build.prod": "webpack --mode production",
+    "build": "tsc",
     "start.bundle": "nodemon -e js,json,env -w . -w .env  -w dist dist/js/server.bundle.js",
     "start": "nodemon -e js,json,env -w . -w .env  -w dist dist/js/server.js",
     "tsc": "tsc",

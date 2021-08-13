@@ -445,8 +445,9 @@ var Controller = /*#__PURE__*/function () {
                   }, isSame);
 
                   if (changedEntry) {
-                    // add the new comment
-                    changedEntry.Comments.push(stateObj); // update the state
+                    var comment = Controller.convertJSONCommentToComment(stateObj); // add the new comment
+
+                    changedEntry.Comments.push(comment); // update the state
 
                     stateManager.updateItemInState(this.config.stateNames.entries, changedEntry, isSame); // was this entry current open by the user?
 
@@ -472,8 +473,11 @@ var Controller = /*#__PURE__*/function () {
 
               case "BlogEntry":
                 {
-                  // add the new item to the state
-                  stateManager.addNewItemToState(this.config.stateNames.entries, stateObj);
+                  var entry = Controller.convertJSONEntryToBlogEntry(stateObj);
+                  cLogger("Converting to BlogEntry type for Create");
+                  cLogger(entry); // add the new item to the state
+
+                  stateManager.addNewItemToState(this.config.stateNames.entries, entry);
                   var _username = "unknown";
 
                   if (changeUser) {
@@ -486,8 +490,9 @@ var Controller = /*#__PURE__*/function () {
 
               case "User":
                 {
-                  // add the new item to the state
-                  stateManager.addNewItemToState(this.config.stateNames.users, stateObj);
+                  var user = Controller.convertJSONUserToUser(stateObj); // add the new item to the state
+
+                  stateManager.addNewItemToState(this.config.stateNames.users, user);
                   notifier.show(stateObj.username, stateObj.username + " has just registered.", 'message');
                   break;
                 }
@@ -501,8 +506,12 @@ var Controller = /*#__PURE__*/function () {
             switch (message.objectType) {
               case "BlogEntry":
                 {
-                  // update the item in the state
-                  stateManager.updateItemInState(this.config.stateNames.entries, stateObj, isSame); // the entry could be selected by this (different user) but that would only be for comments, which is not what changed, so we are done
+                  var _entry2 = Controller.convertJSONEntryToBlogEntry(stateObj);
+
+                  cLogger("Converting to BlogEntry type for Update");
+                  cLogger(_entry2); // update the item in the state
+
+                  stateManager.updateItemInState(this.config.stateNames.entries, _entry2, isSame); // the entry could be selected by this (different user) but that would only be for comments, which is not what changed, so we are done
 
                   break;
                 }

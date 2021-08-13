@@ -1,8 +1,8 @@
 // Configuration and Logging handlers
-import dotenv from'dotenv';
+/* eslint-disable import/first */
+require('dotenv').config();
 import morgan from 'morgan';
 import debug from 'debug';
-
 
 // HTTP handlers
 import http from 'http';
@@ -31,7 +31,7 @@ import {Account} from './models';
 import routes from './routes';
 import apiRoutes from './routes/api';
 
-dotenv.config();
+//dotenv.config();
 console.log(process.env);
 
 const serverDebug = debug('server');
@@ -44,7 +44,7 @@ const app = express();
 
 // Express view/template engine setup
 serverDebug('setting up templating engine');
-app.set('views', path.join(`${__dirname}/../`, 'views'));
+app.set('views', path.join(`${__dirname}/`, 'views'));
 app.engine('handlebars', expressHandlebars({
     defaultLayout: 'default',
     partialsDir: path.join(app.get('views'), 'partials'),

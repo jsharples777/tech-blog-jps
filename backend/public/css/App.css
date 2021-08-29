@@ -1,5 +1,6 @@
 .scroll {
-    max-height: 400px;
+    min-height:20vw;
+    max-height:20vw;
     overflow-y: auto;
 }
 
@@ -16,6 +17,7 @@
     right: 10px;
     z-index: 999;
     transition: all 500ms ease-in-out;
+    width: 30vw
 }
 
 .badge:hover {
@@ -92,9 +94,7 @@ i:hover {
 }
 
 /* On smaller screens, where height is less than 450px, change the style of the sidenav (less padding and a smaller font size) */
-@media screen and (max-height: 450px) {
-    .sidebar {padding-top: 15px;}
-}
+
 
 small-text {
     font-size: 8pt;
@@ -110,4 +110,56 @@ small-heading {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+
+@media screen and (max-height: 450px) {
+    .sidebar {padding-top: 15px;}
+}
+
+@media screen and (max-width: 768px) {
+    .notifications .notification {
+        width: 50vw
+    }
+}
+@media screen and (max-width: 467px) {
+    .notifications .notification {
+        width: 80vw
+    }
+
+    .sidebar-left {
+        padding-top: 0px;
+        top: 0;
+    }
+
+    .sidebar-right {
+        padding-top: 0px;
+        top: 0;
+    }
+}
+
+@media screen and (max-width: 414px) {
+    .notifications .notification {
+        width: 90vw
+    }
+    .timer {
+        font-size: 30pt;
+        width: 45%;
+    }
+    .notifications .notification {
+        width: 100vw
+    }
+    .sidebar-left {
+        padding-top: 0px;
+        top:0;
+    }
+    .sidebar-right {
+        padding-top: 0px;
+        top:0;
+    }
+    .messages {
+        min-height: 55vw;
+        max-height: 55vw;
+    }
+
+}
+
 
